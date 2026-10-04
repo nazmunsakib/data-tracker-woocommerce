@@ -71,11 +71,24 @@ class Plugin {
 	}
 
 	/**
+	 * Whether the plugin has been booted.
+	 *
+	 * @var bool
+	 */
+	private $booted = false;
+
+	/**
 	 * Boot the plugin modules.
 	 *
 	 * @return void
 	 */
 	public function run() {
+		if ( $this->booted ) {
+			return;
+		}
+
+		$this->booted = true;
+
 		$this->options      = new Options();
 		$this->platforms    = new \DataTracker\Platforms\PlatformManager( $this->options );
 		$this->event_log    = new \DataTracker\Diagnostics\EventLog();

@@ -75,6 +75,30 @@ class Admin {
 		add_action( 'admin_notices', array( $this, 'admin_notices' ) );
 		add_action( 'admin_init', array( $this, 'suppress_foreign_notices' ), 999 );
 		add_filter( 'admin_body_class', array( $this, 'admin_body_class' ) );
+		add_filter( 'plugin_action_links_' . DTW_PLUGIN_BASENAME, array( $this, 'plugin_action_links' ) );
+	}
+
+	/**
+	 * Add quick links to the plugin row on the Plugins screen.
+	 *
+	 * @param array $links Existing action links.
+	 * @return array
+	 */
+	public function plugin_action_links( $links ) {
+		$dashboard = sprintf(
+			'<a href="%s">%s</a>',
+			esc_url( admin_url( 'admin.php?page=' . self::SLUG ) ),
+			esc_html__( 'Dashboard', 'data-tracker-woocommerce' )
+		);
+		$settings = sprintf(
+			'<a href="%s">%s</a>',
+			esc_url( admin_url( 'admin.php?page=' . self::SLUG . '-settings' ) ),
+			esc_html__( 'Settings', 'data-tracker-woocommerce' )
+		);
+
+		array_unshift( $links, $dashboard, $settings );
+
+		return $links;
 	}
 
 	/**
