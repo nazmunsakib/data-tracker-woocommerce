@@ -1,0 +1,26 @@
+{
+	"name": "datatracker/data-tracker-woocommerce",
+	"description": "Easy ecommerce tracking for WooCommerce. Automatically track products, carts, checkouts and purchases with Google Analytics 4, Meta Pixel and Google Ads.",
+	"type": "wordpress-plugin",
+	"license": "GPL-2.0-or-later",
+	"authors": [
+		{
+			"name": "Nazmun Sakib",
+			"homepage": "https://github.com/nazmunsakib"
+		}
+	],
+	"require": {
+		"php": ">=7.4"
+	},
+	"autoload": {
+		"psr-4": {
+			"DataTracker\\": "includes/"
+		}
+	},
+	"config": {
+		"optimize-autoloader": true,
+		"sort-packages": true
+	},
+	"minimum-stability": "stable",
+	"prefer-stable": true
+}

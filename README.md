@@ -53,6 +53,16 @@ Open **Data Tracker → Settings → Advanced** and use **Copy Diagnostics**, th
 ### 1.0.0
 - Initial release with GA4, Meta Pixel and Google Ads tracking, WooCommerce event tracking, tracking health dashboard, tracking test, UTM/attribution capture, order attribution, consent support, debug mode and copy diagnostics.
 
+## Development
+
+The plugin is namespaced (`DataTracker\`) and autoloads via **Composer PSR-4** (`DataTracker\` → `includes/`).
+
+```bash
+composer dump-autoload
+```
+
+If Composer has not been run, the plugin falls back to a bundled PSR-4 autoloader, so it works out of the box even when installed from source.
+
 ## License
 
 GPLv2 or later. See [LICENSE](https://www.gnu.org/licenses/gpl-2.0.html).

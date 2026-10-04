@@ -6,8 +6,8 @@
  * Version:           1.0.0
  * Requires at least: 6.0
  * Requires PHP:      7.4
- * Author:            Data Tracker
- * Author URI:        https://example.com
+ * Author:            Nazmun Sakib
+ * Author URI:        https://nazmunsakib.com
  * License:           GPL-2.0-or-later
  * License URI:       https://www.gnu.org/licenses/gpl-2.0.html
  * Text Domain:       data-tracker-woocommerce
@@ -40,9 +40,20 @@ if ( version_compare( PHP_VERSION, DTW_MIN_PHP, '<' ) ) {
 	return;
 }
 
-require_once DTW_PLUGIN_DIR . 'includes/Core/Autoloader.php';
+$dtw_vendor_autoload = DTW_PLUGIN_DIR . 'vendor/autoload.php';
 
-\DataTracker\Core\Autoloader::register();
+if ( is_readable( $dtw_vendor_autoload ) ) {
+	require_once $dtw_vendor_autoload;
+}
+
+/**
+ * Fallback autoloader for environments where Composer has not been run
+ * (for example a WordPress.org install built from the source directory).
+ */
+if ( ! class_exists( '\\DataTracker\\Core\\Autoloader' ) && is_readable( DTW_PLUGIN_DIR . 'includes/Core/Autoloader.php' ) ) {
+	require_once DTW_PLUGIN_DIR . 'includes/Core/Autoloader.php';
+	\DataTracker\Core\Autoloader::register();
+}
 
 /**
  * Declare compatibility with WooCommerce High-Performance Order Storage.
