@@ -60,16 +60,16 @@ class Detector {
 
 		if ( '' !== $html ) {
 			if ( preg_match_all( '/[^A-Z0-9](G-[A-Z0-9]{6,})[^A-Z0-9]/', $html, $matches ) ) {
-				$found['ga4'] = array_values( array_unique( $matches[1] ) );
+				$found['ga4'] = $this->unique_matches( $matches, 1 );
 			}
 			if ( preg_match_all( '/[^A-Z0-9](AW-[0-9]{6,})[^A-Z0-9]/', $html, $matches ) ) {
-				$found['google_ads'] = array_values( array_unique( $matches[1] ) );
+				$found['google_ads'] = $this->unique_matches( $matches, 1 );
 			}
 			if ( preg_match_all( '/fbq\([\'" ]*init[\'" ]*,[\'" ]*([0-9]{5,20})/i', $html, $matches ) ) {
-				$found['meta'] = array_values( array_unique( $matches[1] ) );
+				$found['meta'] = $this->unique_matches( $matches, 1 );
 			}
 			if ( preg_match_all( '/GTM-[A-Z0-9]{4,}/', $html, $matches ) ) {
-				$found['gtm'] = array_values( array_unique( $matches[1] ) );
+				$found['gtm'] = $this->unique_matches( $matches, 0 );
 			}
 		}
 
@@ -81,6 +81,18 @@ class Detector {
 		set_transient( self::CACHE_KEY, $result, self::CACHE_TTL );
 
 		return $result;
+	}
+
+	/**
+	 * De-duplicate a capture group, guarding against optional/absent groups.
+	 *
+	 * @param array  $matches preg_match_all output.
+	 * @param int    $group   Capture group index (0 = full matches).
+	 * @return array
+	 */
+	private function unique_matches( $matches, $group ) {
+		$values = isset( $matches[ $group ] ) ? (array) $matches[ $group ] : array();
+		return array_values( array_unique( $values ) );
 	}
 
 	/**
@@ -120,7 +132,7 @@ class Detector {
 		$response = wp_remote_get(
 			home_url( '/' ),
 			array(
-				'timeout'     => 10,
+				'timeout'     => 5,
 				'redirection' => 2,
 				'sslverify'   => true,
 				'headers'     => array( 'User-Agent' => 'DataTracker-Diagnostics/1.0' ),

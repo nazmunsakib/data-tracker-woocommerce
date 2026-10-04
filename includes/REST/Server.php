@@ -13,6 +13,7 @@ use DataTracker\Core\Options;
 use DataTracker\Diagnostics\Detector;
 use DataTracker\Diagnostics\EventLog;
 use DataTracker\Platforms\PlatformManager;
+use DataTracker\Support\Hpos;
 use DataTracker\Tracking\Event;
 use WP_Error;
 use WP_REST_Request;
@@ -250,7 +251,7 @@ class Server {
 		$lines[] = 'WordPress: ' . get_bloginfo( 'version' );
 		$lines[] = 'WooCommerce: ' . ( defined( 'WC_VERSION' ) ? WC_VERSION : 'Not active' );
 		$lines[] = 'PHP: ' . PHP_VERSION;
-		$lines[] = 'HPOS: ' . ( class_exists( '\Automattic\WooCommerce\Utilities\OrderUtil' ) && \Automattic\WooCommerce\Utilities\OrderUtil::custom_orders_table_usage_is_enabled() ? 'Enabled' : 'Disabled' );
+		$lines[] = 'HPOS: ' . ( Hpos::is_enabled() ? 'Enabled' : 'Disabled' );
 		$lines[] = '';
 		$lines[] = 'Google Analytics: ' . ( $this->platforms->get( 'ga4' )->is_connected() ? 'Connected' : 'Not Connected' );
 		$lines[] = 'Meta Pixel: ' . ( $this->platforms->get( 'meta' )->is_connected() ? 'Connected' : 'Not Connected' );

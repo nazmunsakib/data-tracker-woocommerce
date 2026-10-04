@@ -11,6 +11,7 @@ defined( 'ABSPATH' ) || exit;
 
 use DataTracker\Core\Options;
 use DataTracker\Platforms\PlatformManager;
+use DataTracker\Support\Hpos;
 
 /**
  * Computes a plain-language health score and the checks behind it.
@@ -254,7 +255,7 @@ class Health {
 		$cutoff = gmdate( 'Y-m-d H:i:s', strtotime( '-30 days' ) );
 		$count  = 0;
 
-		if ( class_exists( '\Automattic\WooCommerce\Utilities\OrderUtil' ) && \Automattic\WooCommerce\Utilities\OrderUtil::custom_orders_table_usage_is_enabled() ) {
+		if ( Hpos::is_enabled() ) {
 			$orders_table = $wpdb->prefix . 'wc_orders';
 			$meta_table   = $wpdb->prefix . 'wc_orders_meta';
 
