@@ -172,24 +172,25 @@
 
 		function logAdminTestToActivity(categories, testId) {
 			var cfg = DTW_ADMIN.test_config;
-			if (!cfg || !cfg.log_url || !cfg.frontend_nonce) {
+			if (!cfg || !cfg.log_url) {
 				return;
 			}
+			var body = {
+				events: categories.map(function (c) {
+					return {
+						name: 'dtw_test_event',
+						platform: 'test',
+						page_type: 'test',
+						payload: { category: c, test_id: testId },
+						url: window.location.href
+					};
+				})
+			};
+			body.token = cfg.token || '';
 			fetch(cfg.log_url, {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({
-					nonce: cfg.frontend_nonce,
-					events: categories.map(function (c) {
-						return {
-							name: 'dtw_test_event',
-							platform: 'test',
-							page_type: 'test',
-							payload: { category: c, test_id: testId },
-							url: window.location.href
-						};
-					})
-				})
+				body: JSON.stringify(body)
 			}).catch(function () {});
 		}
 

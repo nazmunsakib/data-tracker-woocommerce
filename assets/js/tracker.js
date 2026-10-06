@@ -15,7 +15,7 @@
 		'purchase'
 	];
 	var enabledEvents =
-		DTW.settings && Array.isArray(DTW.settings.enabled_events) && DTW.settings.enabled_events.length
+		DTW.settings && Array.isArray(DTW.settings.enabled_events)
 			? DTW.settings.enabled_events
 			: defaultEvents;
 	var debug = DTW.debug || {};
@@ -58,7 +58,7 @@
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({
-					nonce: debug.nonce,
+					token: debug.token,
 					events: [
 						{
 							name: name,
@@ -142,6 +142,12 @@
 
 		if (context.product && String(context.product.item_id) === String(id)) {
 			item = context.product;
+			item.quantity = qty;
+			return item;
+		}
+
+		if (context.products && context.products[String(id)]) {
+			item = context.products[String(id)];
 			item.quantity = qty;
 			return item;
 		}
@@ -388,6 +394,21 @@ ga4Send('begin_checkout', cartPayload());
 		});
 	}
 
+	var recentAdds = {};
+
+	function sendAddToCartGuarded(productId, quantity) {
+		if (!productId) {
+			return;
+		}
+		var key = String(productId);
+		var now = Date.now();
+		if (recentAdds[key] && now - recentAdds[key] < 2000) {
+			return;
+		}
+		recentAdds[key] = now;
+		sendAddToCart(productId, quantity);
+	}
+
 	function initAddToCartTracking() {
 		if (window.jQuery) {
 			jQuery(document.body).on('added_to_cart', function (event, fragments, cartHash, button) {
@@ -399,32 +420,77 @@ ga4Send('begin_checkout', cartPayload());
 					var qty = button.attr('data-quantity');
 					if (qty) {
 						quantity = parseInt(qty, 10) || 1;
+					} else if (productId && button.closest) {
+						var cartForm = button.closest('form.cart');
+						if (cartForm && cartForm.length) {
+							var qtyInput = cartForm.find('input[name="quantity"]');
+							if (qtyInput.length) {
+								var n = parseInt(qtyInput.val(), 10);
+								if (n > 0) {
+									quantity = n;
+								}
+							}
+						}
 					}
 				}
 				if (!productId && event.detail) {
 					productId = event.detail.product_id || null;
 				}
 
-				sendAddToCart(productId, quantity);
-			});
-		} else {
-			document.addEventListener('click', function (event) {
-				var target = event.target;
-				var button = target && target.closest
-					? target.closest('a.add_to_cart_button, a.ajax_add_to_cart, .wc-block-grid__product-add-to-cart')
-					: null;
-				if (!button) {
-					return;
-				}
-				var productId = button.getAttribute('data-product_id');
-				var quantity = parseInt(button.getAttribute('data-quantity'), 10) || 1;
-				sendAddToCart(productId, quantity);
+				sendAddToCartGuarded(productId, quantity);
 			});
 		}
 
+		document.addEventListener('added_to_cart', function (event) {
+			var detail = event.detail;
+			if (detail && detail.product_id) {
+				sendAddToCartGuarded(detail.product_id, detail.quantity || 1);
+			}
+		});
+
+		// Click fallback covering classic, Elementor and WooCommerce Blocks
+		// add-to-cart buttons (blocks do not always dispatch the classic event).
 		document.addEventListener('click', function (event) {
 			var target = event.target;
-			var button = target && target.closest ? target.closest('a.remove') : null;
+			if (!target || !target.closest) {
+				return;
+			}
+			var button = target.closest(
+				'a.add_to_cart_button, a.ajax_add_to_cart, ' +
+					'button.add_to_cart_button, button.ajax_add_to_cart, ' +
+					'button.single_add_to_cart_button, a.single_add_to_cart_button, ' +
+					'.wc-block-grid__product-add-to-cart [data-product_id], ' +
+					'.wc-block-product-add-to-cart [data-product_id], ' +
+					'[data-product_id].wc-block-components-button'
+			);
+			if (!button) {
+				return;
+			}
+			var productId = button.getAttribute('data-product_id');
+			if (!productId) {
+				return;
+			}
+			var quantity = parseInt(button.getAttribute('data-quantity'), 10) || 1;
+			if (quantity === 1 && button.closest) {
+				var cartForm = button.closest('form.cart');
+				if (cartForm) {
+					var qtyEl = cartForm.querySelector('input[name="quantity"]');
+					if (qtyEl) {
+						var qv = parseInt(qtyEl.value, 10);
+						if (qv > 0) {
+							quantity = qv;
+						}
+					}
+				}
+			}
+			sendAddToCartGuarded(productId, quantity);
+		});
+
+		document.addEventListener('click', function (event) {
+			var target = event.target;
+			var button = target && target.closest
+				? target.closest('a.remove, .wc-block-cart-item__remove')
+				: null;
 			if (!button) {
 				return;
 			}
@@ -450,6 +516,21 @@ ga4Send('begin_checkout', cartPayload());
 		} else {
 			document.addEventListener('checkout_place_order', firePaymentInfo);
 		}
+
+		// Block checkout "Place Order" fallback (fired once per checkout page).
+		var firedPaymentInfo = false;
+		document.addEventListener('click', function (event) {
+			var target = event.target;
+			if (!target || !target.closest) {
+				return;
+			}
+			var btn = target.closest('[name="wc-block-checkout__submit-button"], .wc-block-checkout__actions button[type="submit"]');
+			if (!btn || firedPaymentInfo) {
+				return;
+			}
+			firedPaymentInfo = true;
+			firePaymentInfo();
+		});
 	}
 
 	function captureUtm() {

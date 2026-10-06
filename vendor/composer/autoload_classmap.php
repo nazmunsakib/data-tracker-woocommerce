@@ -32,6 +32,7 @@ return array(
     'DataTracker\\Platforms\\TrackingPlatform' => $baseDir . '/includes/Platforms/TrackingPlatform.php',
     'DataTracker\\REST\\Server' => $baseDir . '/includes/REST/Server.php',
     'DataTracker\\Support\\Hpos' => $baseDir . '/includes/Support/Hpos.php',
+    'DataTracker\\Support\\LogToken' => $baseDir . '/includes/Support/LogToken.php',
     'DataTracker\\Tracking\\Event' => $baseDir . '/includes/Tracking/Event.php',
     'DataTracker\\Tracking\\Tracker' => $baseDir . '/includes/Tracking/Tracker.php',
     'DataTracker\\WooCommerce\\EventListener' => $baseDir . '/includes/WooCommerce/EventListener.php',

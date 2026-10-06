@@ -47,6 +47,7 @@ class ComposerStaticInit335e57721430089de8bbdcef0d88eeca
         'DataTracker\\Platforms\\TrackingPlatform' => __DIR__ . '/../..' . '/includes/Platforms/TrackingPlatform.php',
         'DataTracker\\REST\\Server' => __DIR__ . '/../..' . '/includes/REST/Server.php',
         'DataTracker\\Support\\Hpos' => __DIR__ . '/../..' . '/includes/Support/Hpos.php',
+        'DataTracker\\Support\\LogToken' => __DIR__ . '/../..' . '/includes/Support/LogToken.php',
         'DataTracker\\Tracking\\Event' => __DIR__ . '/../..' . '/includes/Tracking/Event.php',
         'DataTracker\\Tracking\\Tracker' => __DIR__ . '/../..' . '/includes/Tracking/Tracker.php',
         'DataTracker\\WooCommerce\\EventListener' => __DIR__ . '/../..' . '/includes/WooCommerce/EventListener.php',

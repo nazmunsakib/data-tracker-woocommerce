@@ -260,6 +260,10 @@ No. Google Analytics remains the analytics platform. Data Tracker helps send rel
 
 The plugin is designed for modern WooCommerce environments. Compatibility should be tested with your specific checkout, theme and extensions because WooCommerce stores can use different checkout configurations.
 
+= Does it work with block themes and Elementor? =
+
+Yes. Page-level tracking (product views, cart, checkout and purchases) uses WooCommerce's own page and order data, so it works with classic, block and Elementor setups. Add-to-Cart and Add Payment Information events include fallbacks that also recognize WooCommerce Blocks and Elementor WooCommerce buttons.
+
 = Does it work with guest checkout? =
 
 The plugin is designed to track WooCommerce purchases regardless of whether the customer creates an account, while respecting available consent and tracking configuration.
@@ -295,12 +299,14 @@ The plugin is designed to work with:
 * WordPress
 * WooCommerce
 * WooCommerce HPOS
-* Classic WordPress themes
-* Block themes
-* Gutenberg
-* WooCommerce Blocks page events (cart, checkout and purchase events use WooCommerce order data; cart add/remove micro-events are optimized for classic cart flows)
+* Classic WordPress themes (Storefront and similar)
+* Block themes and Gutenberg
+* Elementor and Elementor Pro WooCommerce templates
+* WooCommerce Blocks
 
-Compatibility with specific themes, caching plugins, checkout customizations and third-party tracking plugins may vary. Test your specific checkout configuration.
+Page-level events that use authoritative WooCommerce data — Product View, View Cart, Begin Checkout and Purchase — work on any theme and any checkout (classic, blocks or Elementor). Add-to-Cart and Add Payment Information are captured through the classic WooCommerce events plus button-level fallbacks, so they work with classic stores, WooCommerce Blocks add-to-cart buttons and Elementor WooCommerce widgets. Remove-from-Cart is captured on classic cart pages.
+
+WooCommerce stores vary widely (custom themes, caching plugins, checkout extensions), so test your specific configuration. A purchase is only recorded for confirmed (paid) orders, which keeps report values reliable.
 
 == Recommended Use ==
 

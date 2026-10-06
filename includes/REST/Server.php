@@ -14,6 +14,7 @@ use DataTracker\Diagnostics\Detector;
 use DataTracker\Diagnostics\EventLog;
 use DataTracker\Platforms\PlatformManager;
 use DataTracker\Support\Hpos;
+use DataTracker\Support\LogToken;
 use DataTracker\Tracking\Event;
 use WP_Error;
 use WP_REST_Request;
@@ -127,8 +128,12 @@ class Server {
 	 */
 	public function permission_frontend( WP_REST_Request $request ) {
 		$nonce = $request->get_param( 'nonce' );
+		$token = $request->get_param( 'token' );
 
-		if ( ! wp_verify_nonce( $nonce, 'dtw_frontend' ) ) {
+		$is_allowed = ( is_string( $nonce ) && wp_verify_nonce( $nonce, 'dtw_frontend' ) )
+			|| LogToken::verify( $token );
+
+		if ( ! $is_allowed ) {
 			return new WP_Error( 'dtw_forbidden', __( 'Invalid request.', 'data-tracker-woocommerce' ), array( 'status' => 403 ) );
 		}
 

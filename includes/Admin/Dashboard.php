@@ -157,19 +157,33 @@ class Dashboard {
 	}
 
 	/**
-	 * Event status overview.
+	 * Event status overview with real activity evidence.
 	 *
 	 * @return array
 	 */
 	private function event_status() {
-		$enabled = (array) $this->options->get( 'enabled_events' );
-		$map     = array();
+		$enabled    = (array) $this->options->get( 'enabled_events' );
+		$observable = (bool) $this->options->get( 'debug_log' );
+		$map        = array();
 
 		foreach ( Options::$all_events as $key => $label ) {
+			$tracking = in_array( $key, $enabled, true );
+
+			if ( ! $tracking ) {
+				$state = 'off';
+			} elseif ( ! $observable ) {
+				$state = 'unverified';
+			} elseif ( $this->event_log->has_event( $key, 7 ) ) {
+				$state = 'working';
+			} else {
+				$state = 'waiting';
+			}
+
 			$map[] = array(
 				'key'     => $key,
 				'label'   => $label,
-				'enabled' => in_array( $key, $enabled, true ),
+				'state'   => $state,
+				'enabled' => $tracking,
 			);
 		}
 

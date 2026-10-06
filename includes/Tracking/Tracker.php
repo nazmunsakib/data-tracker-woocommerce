@@ -121,6 +121,7 @@ class Tracker {
 			'debug'       => array(
 				'log_enabled' => (bool) $this->options->get( 'debug_log' ),
 				'nonce'       => wp_create_nonce( 'dtw_frontend' ),
+				'token'       => \DataTracker\Support\LogToken::get(),
 				'url'         => esc_url_raw( rest_url( 'data-tracker/v1/events' ) ),
 			),
 			'settings'    => array(

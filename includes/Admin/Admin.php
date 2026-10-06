@@ -205,6 +205,7 @@ class Admin {
 				)
 			),
 			'frontend_nonce' => wp_create_nonce( 'dtw_frontend' ),
+			'token'          => \DataTracker\Support\LogToken::get(),
 			'log_url'        => esc_url_raw( rest_url( 'data-tracker/v1/events' ) ),
 		);
 	}

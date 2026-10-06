@@ -15,6 +15,7 @@ if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
 
 delete_option( 'data_tracker_settings' );
 delete_option( 'dtw_version' );
+delete_option( 'dtw_public_token' );
 
 delete_transient( 'dtw_event_log' );
 delete_transient( 'dtw_duplicate_scan' );

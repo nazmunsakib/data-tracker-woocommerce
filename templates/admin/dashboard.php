@@ -234,17 +234,38 @@ foreach ( $platform_cards as $card ) {
 				<h2 class="dtw-card__title"><?php esc_html_e( 'WooCommerce Tracking', 'data-tracker-woocommerce' ); ?></h2>
 				<a class="dtw-link" href="<?php echo esc_url( admin_url( 'admin.php?page=data-tracker-tracking' ) ); ?>"><?php esc_html_e( 'Manage', 'data-tracker-woocommerce' ); ?></a>
 			</div>
+			<?php
+				$state_badges = array(
+					'working'    => array( 'dtw-badge--ok', __( 'Working', 'data-tracker-woocommerce' ) ),
+					'waiting'    => array( 'dtw-badge--warn', __( 'No activity yet', 'data-tracker-woocommerce' ) ),
+					'unverified' => array( 'dtw-badge--muted', __( 'Logging off', 'data-tracker-woocommerce' ) ),
+					'off'        => array( 'dtw-badge--muted', __( 'Off', 'data-tracker-woocommerce' ) ),
+				);
+				$dot_classes  = array(
+					'working'    => 'is-ok',
+					'waiting'    => 'is-warn',
+					'unverified' => 'is-off',
+					'off'        => 'is-off',
+				);
+				$has_waiting  = false;
+				?>
 			<ul class="dtw-status-list">
 				<?php foreach ( $event_status as $event ) : ?>
-					<li class="dtw-status <?php echo $event['enabled'] ? 'is-ok' : 'is-off'; ?>">
+					<?php $has_waiting = $has_waiting || ( 'waiting' === $event['state'] ); ?>
+					<li class="dtw-status <?php echo esc_attr( $dot_classes[ $event['state'] ] ); ?>" title="<?php echo esc_attr( isset( $state_badges[ $event['state'] ][1] ) ? $state_badges[ $event['state'] ][1] : '' ); ?>">
 						<span class="dtw-status__dot" aria-hidden="true"></span>
 						<span class="dtw-status__label"><?php echo esc_html( $event['label'] ); ?></span>
-						<span class="dtw-badge <?php echo $event['enabled'] ? 'dtw-badge--ok' : 'dtw-badge--muted'; ?>">
-							<?php echo $event['enabled'] ? esc_html__( 'Working', 'data-tracker-woocommerce' ) : esc_html__( 'Off', 'data-tracker-woocommerce' ); ?>
+						<span class="dtw-badge <?php echo esc_attr( $state_badges[ $event['state'] ][0] ); ?>">
+							<?php echo esc_html( $state_badges[ $event['state'] ][1] ); ?>
 						</span>
 					</li>
 				<?php endforeach; ?>
 			</ul>
+			<?php if ( $has_waiting ) : ?>
+				<p class="dtw-card__desc">
+					<?php esc_html_e( 'Enabled events show "No activity yet" until the tracker reports them from your store (for example a visit, add to cart, or checkout).', 'data-tracker-woocommerce' ); ?>
+				</p>
+			<?php endif; ?>
 		</div>
 	</div>
 

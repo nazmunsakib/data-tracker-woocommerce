@@ -47,9 +47,40 @@ class PageContext {
 			case 'order-received':
 				$data['order'] = $this->get_order_data();
 				break;
+			default:
+				$data['products'] = $this->get_archive_products();
+				break;
 		}
 
 		return $data;
+	}
+
+	/**
+	 * Product details for products visible on shop, category and archive pages.
+	 * Used to enrich add-to-cart events without extra page queries.
+	 *
+	 * @return array
+	 */
+	private function get_archive_products() {
+		global $wp_query;
+
+		if ( ! ( ( function_exists( 'is_shop' ) && is_shop() ) || ( function_exists( 'is_product_taxonomy' ) && is_product_taxonomy() ) ) ) {
+			return array();
+		}
+
+		$posts    = ! empty( $wp_query->posts ) ? array_slice( $wp_query->posts, 0, 30 ) : array();
+		$products = array();
+
+		foreach ( $posts as $post ) {
+			$product = wc_get_product( $post );
+			if ( ! $product ) {
+				continue;
+			}
+			$item                         = $this->product_array( $product, 1 );
+			$products[ (string) $item['item_id'] ] = $item;
+		}
+
+		return $products;
 	}
 
 	/**
