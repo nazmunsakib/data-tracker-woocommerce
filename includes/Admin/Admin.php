@@ -159,8 +159,19 @@ class Admin {
 			return;
 		}
 
-		wp_enqueue_style( 'dtw-admin', DTW_PLUGIN_URL . 'assets/css/admin.css', array(), DTW_VERSION );
-		wp_enqueue_script( 'dtw-admin', DTW_PLUGIN_URL . 'assets/js/admin.js', array(), DTW_VERSION, true );
+		wp_enqueue_style(
+			'dtw-admin',
+			DTW_PLUGIN_URL . 'assets/css/admin.css',
+			array(),
+			filemtime( DTW_PLUGIN_DIR . 'assets/css/admin.css' ) ?: DTW_VERSION
+		);
+		wp_enqueue_script(
+			'dtw-admin',
+			DTW_PLUGIN_URL . 'assets/js/admin.js',
+			array(),
+			filemtime( DTW_PLUGIN_DIR . 'assets/js/admin.js' ) ?: DTW_VERSION,
+			true
+		);
 
 		wp_localize_script(
 			'dtw-admin',

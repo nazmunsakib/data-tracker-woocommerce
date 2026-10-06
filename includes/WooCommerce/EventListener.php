@@ -45,6 +45,57 @@ class EventListener {
 		add_action( 'woocommerce_checkout_update_order_meta', array( $this, 'attach_attribution_to_order' ), 10, 2 );
 		add_action( 'woocommerce_new_order', array( $this, 'attach_attribution_to_order' ), 10, 1 );
 		add_action( 'woocommerce_order_status_changed', array( $this, 'log_trackable_purchase' ), 10, 4 );
+		add_action( 'woocommerce_add_to_cart', array( $this, 'log_add_to_cart' ), 10, 3 );
+	}
+
+	/**
+	 * Record add-to-cart actions in the diagnostic event log.
+	 *
+	 * Fires for classic, blocks and Elementor carts because it hooks
+	 * WooCommerce's own add-to-cart action (including the Store API used by
+	 * WooCommerce Blocks). Diagnostic only - it is not sent to any platform.
+	 *
+	 * @param string $cart_item_key Cart item key.
+	 * @param int    $product_id    Product id.
+	 * @param int    $quantity      Quantity.
+	 * @return void
+	 */
+	public function log_add_to_cart( $cart_item_key, $product_id, $quantity ) {
+		if ( ! $this->options->get( 'debug_log' ) ) {
+			return;
+		}
+
+		$enabled = (array) $this->options->get( 'enabled_events' );
+		if ( ! in_array( 'add_to_cart', $enabled, true ) ) {
+			return;
+		}
+
+		$product = wc_get_product( $product_id );
+		if ( ! $product ) {
+			return;
+		}
+
+		( new EventLog() )->log(
+			array(
+				'time'      => time(),
+				'name'      => 'add_to_cart',
+				'platform'  => 'woocommerce',
+				'page_type' => 'cart',
+				'payload'   => array(
+					'items' => array(
+						array(
+							'item_id'   => (string) $product_id,
+							'item_name' => $product->get_name(),
+							'item_sku'  => $product->get_sku(),
+							'price'     => (string) round( (float) $product->get_price(), 2 ),
+							'quantity'  => (int) $quantity,
+						),
+					),
+					'currency' => function_exists( 'get_woocommerce_currency' ) ? get_woocommerce_currency() : '',
+				),
+				'url'       => '',
+			)
+		);
 	}
 
 	/**

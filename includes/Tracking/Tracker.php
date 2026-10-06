@@ -101,7 +101,13 @@ class Tracker {
 			return;
 		}
 
-		wp_enqueue_script( 'dtw-tracker', DTW_PLUGIN_URL . 'assets/js/tracker.js', array(), DTW_VERSION, true );
+		wp_enqueue_script(
+			'dtw-tracker',
+			DTW_PLUGIN_URL . 'assets/js/tracker.js',
+			array(),
+			filemtime( DTW_PLUGIN_DIR . 'assets/js/tracker.js' ) ?: DTW_VERSION,
+			true
+		);
 		wp_localize_script( 'dtw-tracker', 'DTW', $this->localize_data() );
 	}
 

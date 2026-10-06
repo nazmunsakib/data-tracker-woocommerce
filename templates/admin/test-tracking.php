@@ -77,7 +77,10 @@ include DTW_PLUGIN_DIR . 'templates/admin/partials/header.php';
 			<span class="dtw-badge dtw-badge--info"><?php esc_html_e( 'Recommended', 'data-tracker-woocommerce' ); ?></span>
 		</div>
 		<p><?php esc_html_e( 'This fires identifiable test events for Product View, Add to Cart, Checkout and Purchase through the same tracking code your store uses — directly from this page, no visitors needed. Confirm them in GA4 Realtime/DebugView or Meta Event Testing.', 'data-tracker-woocommerce' ); ?></p>
-		<p class="dtw-card__desc"><?php esc_html_e( 'No test purchase order is created and no fake revenue or conversion is sent. Test events only carry a test label, so they can never be counted as real conversions.', 'data-tracker-woocommerce' ); ?></p>
+		<p class="dtw-card__desc">
+			<?php esc_html_e( 'In your platforms these test events appear with the prefix dtw_test_ (for example dtw_test_add_to_cart). That is intentional — a test could otherwise be counted as a real conversion. Real visitor events use their normal names, like add_to_cart, begin_checkout and purchase.', 'data-tracker-woocommerce' ); ?>
+		</p>
+		<p class="dtw-card__desc"><?php esc_html_e( 'No test purchase order is created and no fake revenue or conversion is sent.', 'data-tracker-woocommerce' ); ?></p>
 
 		<?php if ( $consent['enabled'] ) : ?>
 			<div class="dtw-alert dtw-alert--warn">
