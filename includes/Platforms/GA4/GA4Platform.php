@@ -91,7 +91,10 @@ class GA4Platform implements TrackingPlatform {
 		$id = strtoupper( trim( $id ) );
 
 		if ( '' !== $id && ! preg_match( '/^G-[A-Z0-9]{6,}$/i', $id ) ) {
-			return new \WP_Error( 'dtw_invalid_id', __( 'That Google Analytics ID does not look right. It should look like G-XXXXXXXXXX.', 'data-tracker-woocommerce' ) );
+			return new \WP_Error(
+				'dtw_invalid_id',
+				__( 'That Google Analytics ID does not look right. Enter your GA4 Measurement ID which starts with G- and looks like G-XXXXXXXXXX. This is not a Google Tag Manager container (GTM-...).', 'data-tracker-woocommerce' )
+			);
 		}
 
 		$this->options->update( 'ga4_measurement_id', $id );

@@ -61,7 +61,7 @@ class MetaPlatform implements TrackingPlatform {
 	 * {@inheritdoc}
 	 */
 	public function is_connected() {
-		return (bool) preg_match( '/^\d{5,20}$/', $this->get_pixel_id() );
+		return (bool) preg_match( '/^\d{14,20}$/', $this->get_pixel_id() );
 	}
 
 	/**
@@ -90,8 +90,11 @@ class MetaPlatform implements TrackingPlatform {
 		$id = isset( $data['meta_pixel_id'] ) ? sanitize_text_field( wp_unslash( $data['meta_pixel_id'] ) ) : '';
 		$id = trim( $id );
 
-		if ( '' !== $id && ! preg_match( '/^\d{5,20}$/', $id ) ) {
-			return new \WP_Error( 'dtw_invalid_id', __( 'That Meta Pixel ID does not look right. It should be a number.', 'data-tracker-woocommerce' ) );
+		if ( '' !== $id && ! preg_match( '/^\d{14,20}$/', $id ) ) {
+			return new \WP_Error(
+				'dtw_invalid_id',
+				__( 'That Meta Pixel ID does not look right. A Pixel ID is a number from Meta Events Manager, usually 15 digits long (for example 123456789012345).', 'data-tracker-woocommerce' )
+			);
 		}
 
 		$this->options->update( 'meta_pixel_id', $id );

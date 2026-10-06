@@ -150,12 +150,55 @@
 					if (preview) {
 						preview.textContent = JSON.stringify(data, null, 2);
 					}
+					renderTestResults(data);
 				})
 				.catch(function () {
 					if (preview) {
 						preview.textContent = 'Unable to build the technical preview.';
 					}
 				});
+		}
+
+		function renderTestResults(data) {
+			var box = $('#dtw-test-results');
+			if (!box) {
+				return;
+			}
+			var platformNames = {
+				ga4: 'Google Analytics',
+				meta: 'Meta Pixel',
+				google_ads: 'Google Ads'
+			};
+			var html = '';
+			var preview = data && data.preview ? data.preview : {};
+			Object.keys(preview).forEach(function (pid) {
+				if (platformNames[pid]) {
+					html += '<div class="dtw-test-result-line">'
+						+ '<span class="dashicons dashicons-yes-alt" aria-hidden="true"></span>'
+						+ platformNames[pid] + ' — ' + 'Event sent'
+						+ '</div>';
+				}
+			});
+			if (data && data.consent) {
+				if (data.consent.enabled) {
+					var msg = data.consent.api_available
+						? 'Consent tracking is on — confirm events in your testing tools after consent is granted.'
+						: 'Consent mode is on, but no WP Consent API plugin was detected. Tracking may stay off until consent is granted.';
+					html += '<div class="dtw-test-result-line is-warn">'
+						+ '<span class="dashicons dashicons-warning" aria-hidden="true"></span>'
+						+ msg + '</div>';
+				} else {
+					html += '<div class="dtw-test-result-line">'
+						+ '<span class="dashicons dashicons-yes-alt" aria-hidden="true"></span>'
+						+ 'Consent — not required' + '</div>';
+				}
+			}
+			if (!html) {
+				html = '<div class="dtw-test-result-line is-warn">'
+					+ '<span class="dashicons dashicons-warning" aria-hidden="true"></span>'
+					+ 'No connected platforms to send to.' + '</div>';
+			}
+			box.innerHTML = html;
 		}
 	}
 

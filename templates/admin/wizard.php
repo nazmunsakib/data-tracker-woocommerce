@@ -53,7 +53,7 @@ $error_msg   = isset( $_GET['dtw_error'] ) ? sanitize_text_field( wp_unslash( $_
 
 				<p>
 					<label for="dtw_wizard_meta"><strong><?php esc_html_e( 'Meta Pixel ID', 'data-tracker-woocommerce' ); ?></strong></label>
-					<input class="regular-text" type="text" id="dtw_wizard_meta" name="meta_pixel_id" value="" placeholder="123456789" autocomplete="off" />
+					<input class="regular-text" type="text" id="dtw_wizard_meta" name="meta_pixel_id" value="" placeholder="123456789012345" autocomplete="off" />
 					<span class="description"><?php esc_html_e( 'Optional. Skip if you do not use Meta.', 'data-tracker-woocommerce' ); ?></span>
 				</p>
 

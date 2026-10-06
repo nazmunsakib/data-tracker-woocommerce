@@ -85,7 +85,36 @@ class FormHandler {
 			$this->redirect( $redirect_to, 'connected', array( 'dtw_step' => '3' ) );
 		}
 
+		if ( ! $this->submitted_ids() ) {
+			if ( $this->platforms->has_any_connected() ) {
+				$this->redirect( $redirect_to, 'saved' );
+			}
+			$this->redirect( $redirect_to, 'nochange' );
+		}
+
 		$this->redirect( $redirect_to, 'connected' );
+	}
+
+	/**
+	 * Whether any tracking ID field was submitted with a value.
+	 *
+	 * @return bool
+	 */
+	private function submitted_ids() {
+		$fields = array(
+			'ga4_measurement_id',
+			'meta_pixel_id',
+			'google_ads_conversion_id',
+			'google_ads_conversion_label',
+		);
+
+		foreach ( $fields as $field ) {
+			if ( isset( $_POST[ $field ] ) && '' !== trim( (string) wp_unslash( $_POST[ $field ] ) ) ) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	/**
@@ -182,14 +211,14 @@ class FormHandler {
 	/**
 	 * Redirect back to a Data Tracker page with a success message.
 	 *
-	 * @param string $page    Page slug suffix.
+	 * @param string $page    Full page slug, e.g. "data-tracker-connections".
 	 * @param string $message Message key.
 	 * @param array  $extra   Extra query args.
 	 * @return void
 	 */
 	private function redirect( $page, $message, $extra = array() ) {
 		$args = array_merge(
-			array( 'page' => 'data-tracker-' . $page, 'dtw_message' => $message ),
+			array( 'page' => $page, 'dtw_message' => $message ),
 			$extra
 		);
 
@@ -200,7 +229,7 @@ class FormHandler {
 	/**
 	 * Redirect back with a WP_Error message.
 	 *
-	 * @param string   $page  Page slug suffix.
+	 * @param string   $page  Full page slug, e.g. "data-tracker-connections".
 	 * @param WP_Error $error Error object.
 	 * @return void
 	 */
@@ -208,8 +237,8 @@ class FormHandler {
 		wp_safe_redirect(
 			add_query_arg(
 				array(
-					'page'        => 'data-tracker-' . $page,
-					'dtw_error'   => rawurlencode( $error->get_error_message() ),
+					'page'      => $page,
+					'dtw_error' => rawurlencode( $error->get_error_message() ),
 				),
 				admin_url( 'admin.php' )
 			)

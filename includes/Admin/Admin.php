@@ -183,14 +183,20 @@ class Admin {
 
 		$message = isset( $_GET['dtw_message'] ) ? sanitize_key( wp_unslash( $_GET['dtw_message'] ) ) : '';
 		if ( $on_dtw && '' !== $message ) {
-			$texts = array(
+			$success = array(
 				'connected'    => __( 'Tracking platform connected.', 'data-tracker-woocommerce' ),
 				'disconnected' => __( 'Tracking platform disconnected.', 'data-tracker-woocommerce' ),
 				'saved'        => __( 'Settings saved.', 'data-tracker-woocommerce' ),
 				'welcome-done' => __( 'Setup complete. Your tracking is ready to test.', 'data-tracker-woocommerce' ),
 			);
-			if ( isset( $texts[ $message ] ) ) {
-				echo '<div class="notice notice-success is-dismissible"><p>' . esc_html( $texts[ $message ] ) . '</p></div>';
+			$info    = array(
+				'nochange' => __( 'No tracking IDs were entered, so nothing was changed. Connect Google Analytics, Meta Pixel or Google Ads to start tracking.', 'data-tracker-woocommerce' ),
+			);
+
+			if ( isset( $success[ $message ] ) ) {
+				echo '<div class="notice notice-success is-dismissible"><p>' . esc_html( $success[ $message ] ) . '</p></div>';
+			} elseif ( isset( $info[ $message ] ) ) {
+				echo '<div class="notice notice-info is-dismissible"><p>' . esc_html( $info[ $message ] ) . '</p></div>';
 			}
 		}
 

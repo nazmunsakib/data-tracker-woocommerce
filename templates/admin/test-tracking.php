@@ -84,6 +84,7 @@ include DTW_PLUGIN_DIR . 'templates/admin/partials/header.php';
 			</button>
 		</p>
 		<p id="dtw-test-status" class="dtw-test-status" role="status"></p>
+		<div id="dtw-test-results" class="dtw-test-results"></div>
 
 		<div id="dtw-test-result" class="dtw-test-result" hidden>
 			<h3 class="dtw-card__title"><?php esc_html_e( 'How to confirm it worked', 'data-tracker-woocommerce' ); ?></h3>

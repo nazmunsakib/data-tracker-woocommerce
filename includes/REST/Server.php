@@ -230,6 +230,10 @@ class Server {
 				'ok'      => true,
 				'test_id' => $test_id,
 				'preview' => $preview,
+				'consent' => array(
+					'enabled'       => (bool) $this->options->get( 'respect_consent' ),
+					'api_available' => function_exists( 'wp_has_consent' ),
+				),
 				'message' => __( 'Test event sent. Open Google Analytics 4 DebugView or the Meta Event Testing tool to confirm it arrives.', 'data-tracker-woocommerce' ),
 			)
 		);
@@ -252,6 +256,10 @@ class Server {
 		$lines[] = 'WooCommerce: ' . ( defined( 'WC_VERSION' ) ? WC_VERSION : 'Not active' );
 		$lines[] = 'PHP: ' . PHP_VERSION;
 		$lines[] = 'HPOS: ' . ( Hpos::is_enabled() ? 'Enabled' : 'Disabled' );
+
+		$theme = wp_get_theme();
+		$lines[] = 'Theme: ' . $theme->get( 'Name' ) . ' ' . $theme->get( 'Version' );
+
 		$lines[] = '';
 		$lines[] = 'Google Analytics: ' . ( $this->platforms->get( 'ga4' )->is_connected() ? 'Connected' : 'Not Connected' );
 		$lines[] = 'Meta Pixel: ' . ( $this->platforms->get( 'meta' )->is_connected() ? 'Connected' : 'Not Connected' );
@@ -266,6 +274,17 @@ class Server {
 		$lines[] = 'Last Tested: ' . EventLog::relative_time( $this->event_log->last_tested() );
 		$lines[] = 'Consent API: ' . ( function_exists( 'wp_has_consent' ) ? 'Available' : 'Not Available' );
 		$lines[] = 'Debug Mode: ' . ( $this->options->get( 'debug_mode' ) ? 'Enabled' : 'Disabled' );
+
+		$other_plugins = ( new Detector() )->detect_other_plugins();
+		$lines[] = '';
+		if ( empty( $other_plugins ) ) {
+			$lines[] = 'Relevant Plugins: None detected';
+		} else {
+			$lines[] = 'Relevant Plugins:';
+			foreach ( $other_plugins as $name ) {
+				$lines[] = ' - ' . $name;
+			}
+		}
 
 		return rest_ensure_response(
 			array(

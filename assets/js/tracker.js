@@ -60,12 +60,13 @@
 		} catch (e) {}
 	}
 
-	function ga4Send(eventName, params) {
+	function ga4Send(canonical, params) {
 		if (!ga4Connected()) {
 			return;
 		}
+		var mapped = (platforms.ga4.event_map || {})[canonical] || canonical;
 		window.dataLayer = window.dataLayer || [];
-		var obj = { event: eventName };
+		var obj = { event: mapped };
 		if (params) {
 			for (var k in params) {
 				if (params.hasOwnProperty(k)) {
@@ -74,31 +75,32 @@
 			}
 		}
 		window.dataLayer.push(obj);
-		logEvent(eventName, 'ga4', params || {});
+		logEvent(canonical, 'ga4', params || {});
 	}
 
-	function metaSend(eventName, params, custom) {
+	function metaSend(canonical, params, custom) {
 		if (!metaConnected() || !metaConsentAllowed()) {
 			return;
 		}
+		var mapped = (platforms.meta.event_map || {})[canonical] || canonical;
 		if (typeof window.fbq === 'function') {
 			if (custom) {
-				window.fbq('trackCustom', eventName, params || {});
+				window.fbq('trackCustom', mapped, params || {});
 			} else {
-				window.fbq('track', eventName, params || {});
+				window.fbq('track', mapped, params || {});
 			}
 		}
-		logEvent(eventName, 'meta', params || {});
+		logEvent(canonical, 'meta', params || {});
 	}
 
-	function pushAdEvent(params) {
+	function pushAdEvent(canonical, params) {
 		if (!adsConnected()) {
 			return;
 		}
 		if (typeof window.gtag === 'function') {
 			window.gtag('event', 'conversion', params);
 		}
-		logEvent('conversion', 'google_ads', params || {});
+		logEvent(canonical, 'google_ads', params || {});
 	}
 
 	function itemToArray(item) {
@@ -279,12 +281,12 @@
 		if (type === 'product' && context.product) {
 			var product = context.product;
 			if (eventEnabled('product_view')) {
-				ga4Send(platforms.ga4.event_map.product_view, {
-					currency: context.currency || '',
-					value: product.price || 0,
-					items: [itemToArray(product)]
-				});
-				metaSend(platforms.meta.event_map.product_view, {
+ga4Send('product_view', {
+				currency: context.currency || '',
+				value: product.price || 0,
+				items: [itemToArray(product)]
+			});
+			metaSend('product_view', {
 					content_type: 'product',
 					content_ids: [String(product.item_id)],
 					content_name: product.item_name || undefined,
@@ -297,15 +299,15 @@
 
 		if (type === 'cart' && context.cart) {
 			if (eventEnabled('view_cart')) {
-				ga4Send(platforms.ga4.event_map.view_cart, cartPayload());
-				metaSend(platforms.meta.event_map.view_cart, cartPayloadMeta());
+ga4Send('view_cart', cartPayload());
+			metaSend('view_cart', cartPayloadMeta());
 			}
 		}
 
 		if (type === 'checkout' && context.cart) {
 			if (eventEnabled('begin_checkout')) {
-				ga4Send(platforms.ga4.event_map.begin_checkout, cartPayload());
-				metaSend(platforms.meta.event_map.begin_checkout, cartPayloadMeta());
+ga4Send('begin_checkout', cartPayload());
+			metaSend('begin_checkout', cartPayloadMeta());
 			}
 		}
 
@@ -313,11 +315,11 @@
 			if (eventEnabled('purchase')) {
 				var orderFlag = 'dtw_p_' + String(context.order.id);
 				if (!readFlag(orderFlag)) {
-					ga4Send(platforms.ga4.event_map.purchase, purchasePayload());
-					metaSend(platforms.meta.event_map.purchase, purchasePayloadMeta());
+					ga4Send('purchase', purchasePayload());
+					metaSend('purchase', purchasePayloadMeta());
 
 					if (adsConnected()) {
-						pushAdEvent({
+						pushAdEvent('purchase', {
 							send_to: platforms.google_ads.conversion_id + '/' + platforms.google_ads.conversion_label,
 							transaction_id: String(context.order.id),
 							value: context.order.total || 0,
@@ -339,12 +341,12 @@
 		var item = resolveItem(productId, quantity);
 		var value = (item.price || 0) * (item.quantity || 1);
 
-		ga4Send(platforms.ga4.event_map.add_to_cart, {
+		ga4Send('add_to_cart', {
 			currency: context.currency || '',
 			value: value,
 			items: [itemToArray(item)]
 		});
-		metaSend(platforms.meta.event_map.add_to_cart, {
+		metaSend('add_to_cart', {
 			content_type: 'product',
 			content_ids: [String(item.item_id)],
 			content_name: item.item_name || undefined,
@@ -359,12 +361,12 @@
 			return;
 		}
 		var item = resolveItem(productId, 1);
-		ga4Send(platforms.ga4.event_map.remove_from_cart, {
+		ga4Send('remove_from_cart', {
 			currency: context.currency || '',
 			value: item.price || 0,
 			items: [itemToArray(item)]
 		});
-		metaSend(platforms.meta.event_map.remove_from_cart, {
+		metaSend('remove_from_cart', {
 			content_type: 'product',
 			content_ids: [String(item.item_id)],
 			contents: [{ id: String(item.item_id), quantity: 1, item_price: item.price }],
@@ -426,8 +428,8 @@
 			if (!context.cart) {
 				return;
 			}
-			ga4Send(platforms.ga4.event_map.add_payment_info, cartPayload());
-			metaSend(platforms.meta.event_map.add_payment_info, cartPayloadMeta());
+			ga4Send('add_payment_info', cartPayload());
+			metaSend('add_payment_info', cartPayloadMeta());
 		}
 
 		if (window.jQuery) {

@@ -56,18 +56,18 @@ class Connections {
 
 		$fields = array(
 			'ga4' => array(
-				'key'       => 'ga4_measurement_id',
-				'label'     => __( 'Measurement ID', 'data-tracker-woocommerce' ),
-				'help'      => __( 'Found in Google Analytics under Admin > Data Streams. It looks like G-XXXXXXXXXX.', 'data-tracker-woocommerce' ),
-				'value'     => $this->options->get( 'ga4_measurement_id' ),
+				'key'         => 'ga4_measurement_id',
+				'label'       => __( 'Measurement ID', 'data-tracker-woocommerce' ),
+				'help'        => __( 'Found in Google Analytics under Admin > Data Streams. It starts with G- (this is not a Google Tag Manager container ID).', 'data-tracker-woocommerce' ),
+				'value'       => $this->options->get( 'ga4_measurement_id' ),
 				'placeholder' => 'G-XXXXXXXXXX',
 			),
 			'meta' => array(
-				'key'       => 'meta_pixel_id',
-				'label'     => __( 'Pixel ID', 'data-tracker-woocommerce' ),
-				'help'      => __( 'Found in Meta Events Manager. It is a number like 123456789.', 'data-tracker-woocommerce' ),
-				'value'     => $this->options->get( 'meta_pixel_id' ),
-				'placeholder' => '123456789',
+				'key'         => 'meta_pixel_id',
+				'label'       => __( 'Pixel ID', 'data-tracker-woocommerce' ),
+				'help'        => __( 'Found in Meta Events Manager. It is a number, usually 15 digits long.', 'data-tracker-woocommerce' ),
+				'value'       => $this->options->get( 'meta_pixel_id' ),
+				'placeholder' => '123456789012345',
 			),
 		);
 

@@ -9,8 +9,9 @@
  * @var array  $problems
  * @var array  $next_steps
  * @var array  $platforms
+ * @var array  $platform_cards
  * @var array  $event_status
- * @var array  $recent_events
+ * @var array  $activity
  * @var int    $last_tested
  * @var bool   $wc_active
  * @var bool   $connected
@@ -22,6 +23,23 @@ defined( 'ABSPATH' ) || exit;
 
 $active_tab = 'data-tracker';
 include DTW_PLUGIN_DIR . 'templates/admin/partials/header.php';
+
+$activity_labels = array(
+	'product_view'     => __( 'Product View', 'data-tracker-woocommerce' ),
+	'add_to_cart'      => __( 'Add to Cart', 'data-tracker-woocommerce' ),
+	'remove_from_cart' => __( 'Remove from Cart', 'data-tracker-woocommerce' ),
+	'view_cart'        => __( 'View Cart', 'data-tracker-woocommerce' ),
+	'begin_checkout'   => __( 'Begin Checkout', 'data-tracker-woocommerce' ),
+	'add_payment_info' => __( 'Add Payment Information', 'data-tracker-woocommerce' ),
+	'purchase'         => __( 'Purchase', 'data-tracker-woocommerce' ),
+	'dtw_test_event'   => __( 'Tracking Test', 'data-tracker-woocommerce' ),
+);
+
+$platform_labels = array(
+	'ga4'        => 'Google Analytics',
+	'meta'       => 'Meta Pixel',
+	'google_ads' => 'Google Ads',
+);
 ?>
 
 	<?php if ( '' !== $error_msg ) : ?>
@@ -49,7 +67,7 @@ include DTW_PLUGIN_DIR . 'templates/admin/partials/header.php';
 		</div>
 	<?php endif; ?>
 
-	<div class="dtw-hero dtw-grid-3">
+	<div class="dtw-hero dtw-grid-2">
 		<div class="dtw-card dtw-health-card">
 			<div class="dtw-health-score" style="--dtw-score: <?php echo (int) $score; ?>">
 				<div class="dtw-health-score__value"><?php echo (int) $score; ?>%</div>
@@ -81,37 +99,6 @@ include DTW_PLUGIN_DIR . 'templates/admin/partials/header.php';
 
 		<div class="dtw-card">
 			<div class="dtw-card__head">
-				<h2 class="dtw-card__title"><?php esc_html_e( 'Connected Platforms', 'data-tracker-woocommerce' ); ?></h2>
-				<a class="dtw-link" href="<?php echo esc_url( admin_url( 'admin.php?page=data-tracker-connections' ) ); ?>"><?php esc_html_e( 'Manage', 'data-tracker-woocommerce' ); ?></a>
-			</div>
-			<ul class="dtw-status-list">
-				<?php foreach ( $platforms as $platform ) : ?>
-					<?php $status = $platform->get_status(); ?>
-					<li class="dtw-status <?php echo $status['connected'] ? 'is-ok' : 'is-off'; ?>">
-						<span class="dtw-status__dot" aria-hidden="true"></span>
-						<span class="dtw-status__label"><?php echo esc_html( $status['label'] ); ?></span>
-						<span class="dtw-badge <?php echo $status['connected'] ? 'dtw-badge--ok' : 'dtw-badge--muted'; ?>">
-							<?php echo $status['connected'] ? esc_html__( 'Connected', 'data-tracker-woocommerce' ) : esc_html__( 'Not connected', 'data-tracker-woocommerce' ); ?>
-						</span>
-					</li>
-				<?php endforeach; ?>
-			</ul>
-			<?php if ( $connected && ! $last_tested ) : ?>
-				<p class="dtw-card__desc">
-					<?php esc_html_e( 'Platforms are connected but tracking has not been tested yet.', 'data-tracker-woocommerce' ); ?>
-				</p>
-			<?php elseif ( $connected && $last_tested ) : ?>
-				<p class="dtw-card__desc">
-					<?php
-					/* translators: %s: relative time, e.g. "5 minutes ago" */
-					echo esc_html( sprintf( __( 'Tracking tested %s.', 'data-tracker-woocommerce' ), \DataTracker\Diagnostics\EventLog::relative_time( $last_tested ) ) );
-					?>
-				</p>
-			<?php endif; ?>
-		</div>
-
-		<div class="dtw-card">
-			<div class="dtw-card__head">
 				<h2 class="dtw-card__title"><?php esc_html_e( 'WooCommerce Tracking', 'data-tracker-woocommerce' ); ?></h2>
 				<a class="dtw-link" href="<?php echo esc_url( admin_url( 'admin.php?page=data-tracker-tracking' ) ); ?>"><?php esc_html_e( 'Manage', 'data-tracker-woocommerce' ); ?></a>
 			</div>
@@ -129,24 +116,82 @@ include DTW_PLUGIN_DIR . 'templates/admin/partials/header.php';
 		</div>
 	</div>
 
+	<h2 class="dtw-section-title"><?php esc_html_e( 'Platforms', 'data-tracker-woocommerce' ); ?></h2>
+	<div class="dtw-grid dtw-grid-3 dtw-platform-grid">
+		<?php foreach ( $platform_cards as $card ) : ?>
+			<div class="dtw-card dtw-platform-mini">
+				<div class="dtw-platform-mini__head">
+					<span class="dtw-platform-mini__icon"><span class="dashicons <?php echo esc_attr( $card['icon'] ); ?>"></span></span>
+					<span class="dtw-badge <?php echo $card['connected'] ? 'dtw-badge--ok' : 'dtw-badge--muted'; ?>">
+						<?php echo $card['connected'] ? esc_html__( 'Connected', 'data-tracker-woocommerce' ) : esc_html__( 'Not connected', 'data-tracker-woocommerce' ); ?>
+					</span>
+				</div>
+				<h3 class="dtw-platform-mini__title"><?php echo esc_html( $card['label'] ); ?></h3>
+				<p class="dtw-platform-mini__value"><?php echo $card['connected'] ? '<code>' . esc_html( $card['value'] ) . '</code>' : esc_html__( '—', 'data-tracker-woocommerce' ); ?></p>
+				<a class="dtw-btn dtw-btn--small <?php echo esc_attr( $card['action']['class'] ); ?>" href="<?php echo esc_url( $card['action']['url'] ); ?>">
+					<?php echo esc_html( $card['action']['label'] ); ?>
+				</a>
+			</div>
+		<?php endforeach; ?>
+	</div>
+
 	<div class="dtw-card dtw-card--activity">
 		<div class="dtw-card__head">
 			<h2 class="dtw-card__title"><?php esc_html_e( 'Recent Activity', 'data-tracker-woocommerce' ); ?></h2>
 			<span class="dtw-badge dtw-badge--info"><?php esc_html_e( 'Live', 'data-tracker-woocommerce' ); ?></span>
 		</div>
-		<?php if ( empty( $recent_events ) ) : ?>
+		<?php if ( empty( $activity ) ) : ?>
 			<p class="dtw-card__desc">
 				<?php esc_html_e( 'No activity yet. Visit your store or run a tracking test to generate events.', 'data-tracker-woocommerce' ); ?>
 			</p>
 		<?php else : ?>
 			<ul class="dtw-activity-list">
-				<?php foreach ( $recent_events as $entry ) : ?>
+				<?php foreach ( $activity as $item ) : ?>
+					<?php
+					$label    = isset( $activity_labels[ $item['name'] ] ) ? $activity_labels[ $item['name'] ] : ucwords( str_replace( '_', ' ', $item['name'] ) );
+					$payload  = $item['payload'];
+					$order_id = isset( $payload['transaction_id'] ) ? $payload['transaction_id'] : ( isset( $payload['id'] ) ? $payload['id'] : '' );
+					$value    = isset( $payload['value'] ) ? $payload['value'] : '';
+					$currency = isset( $payload['currency'] ) ? $payload['currency'] : '';
+					$items    = isset( $payload['items'] ) && is_array( $payload['items'] ) ? count( $payload['items'] ) : '';
+					?>
 					<li class="dtw-activity">
 						<span class="dtw-activity__check" aria-hidden="true"><span class="dashicons dashicons-yes-alt"></span></span>
-						<span class="dtw-activity__name"><?php echo esc_html( $entry['name'] ); ?></span>
-						<span class="dtw-activity__time">
-							<?php echo esc_html( \DataTracker\Diagnostics\EventLog::relative_time( (int) $entry['time'] ) ); ?>
-						</span>
+						<div class="dtw-activity__main">
+							<span class="dtw-activity__name"><?php echo esc_html( $label ); ?></span>
+							<span class="dtw-activity__platforms">
+								<?php if ( empty( $item['platforms'] ) ) : ?>
+									<span class="dtw-activity__platform">—</span>
+								<?php else : ?>
+									<?php foreach ( $item['platforms'] as $pid ) : ?>
+										<span class="dtw-activity__platform"><?php echo esc_html( isset( $platform_labels[ $pid ] ) ? $platform_labels[ $pid ] : $pid ); ?> ✓</span>
+									<?php endforeach; ?>
+								<?php endif; ?>
+							</span>
+							<?php if ( 'purchase' === $item['name'] ) : ?>
+								<span class="dtw-activity__meta">
+									<?php
+									printf(
+										/* translators: 1: order id, 2: value, 3: currency */
+										esc_html__( 'Order #%1$s · %2$s %3$s', 'data-tracker-woocommerce' ),
+										esc_html( $order_id ? $order_id : '—' ),
+										esc_html( '' !== $value ? round( (float) $value, 2 ) : '—' ),
+										esc_html( $currency ? $currency : '' )
+									);
+									?>
+									<?php if ( '' !== $items ) : ?>
+										<em><?php echo esc_html( sprintf( /* translators: %d: item count */ _n( '(%d item)', '(%d items)', $items, 'data-tracker-woocommerce' ), $items ) ); ?></em>
+									<?php endif; ?>
+								</span>
+							<?php endif; ?>
+						</div>
+						<span class="dtw-activity__time"><?php echo esc_html( \DataTracker\Diagnostics\EventLog::relative_time( $item['time'] ) ); ?></span>
+						<?php if ( $debug_mode ) : ?>
+							<details class="dtw-activity__details">
+								<summary><?php esc_html_e( 'Technical', 'data-tracker-woocommerce' ); ?></summary>
+								<pre class="dtw-activity__json"><?php echo esc_html( wp_json_encode( $item['payload'], JSON_PRETTY_PRINT ) ); ?></pre>
+							</details>
+						<?php endif; ?>
 					</li>
 				<?php endforeach; ?>
 			</ul>
@@ -215,7 +260,7 @@ include DTW_PLUGIN_DIR . 'templates/admin/partials/header.php';
 		</summary>
 		<div class="dtw-card dtw-card--technical">
 			<h3 class="dtw-card__title"><?php esc_html_e( 'Recent tracking events', 'data-tracker-woocommerce' ); ?></h3>
-			<?php if ( empty( $recent_events ) ) : ?>
+			<?php if ( empty( $activity ) ) : ?>
 				<p><?php esc_html_e( 'No events received yet. Visit your store or run a tracking test to generate events.', 'data-tracker-woocommerce' ); ?></p>
 			<?php else : ?>
 				<table class="widefat striped dtw-table">
@@ -223,17 +268,15 @@ include DTW_PLUGIN_DIR . 'templates/admin/partials/header.php';
 						<tr>
 							<th><?php esc_html_e( 'Time', 'data-tracker-woocommerce' ); ?></th>
 							<th><?php esc_html_e( 'Event', 'data-tracker-woocommerce' ); ?></th>
-							<th><?php esc_html_e( 'Platform', 'data-tracker-woocommerce' ); ?></th>
-							<th><?php esc_html_e( 'Page', 'data-tracker-woocommerce' ); ?></th>
+							<th><?php esc_html_e( 'Platforms', 'data-tracker-woocommerce' ); ?></th>
 						</tr>
 					</thead>
 					<tbody>
-						<?php foreach ( $recent_events as $entry ) : ?>
+						<?php foreach ( $activity as $item ) : ?>
 							<tr>
-								<td><?php echo esc_html( gmdate( 'M j, H:i:s', (int) $entry['time'] ) ); ?></td>
-								<td><code><?php echo esc_html( $entry['name'] ); ?></code></td>
-								<td><?php echo esc_html( $entry['platform'] ); ?></td>
-								<td><?php echo esc_html( $entry['page_type'] ); ?></td>
+								<td><?php echo esc_html( gmdate( 'M j, H:i:s', $item['time'] ) ); ?></td>
+								<td><code><?php echo esc_html( $item['name'] ); ?></code></td>
+								<td><?php echo esc_html( implode( ', ', array_map( function ( $p ) use ( $platform_labels ) { return isset( $platform_labels[ $p ] ) ? $platform_labels[ $p ] : $p; }, $item['platforms'] ) ) ); ?></td>
 							</tr>
 						<?php endforeach; ?>
 					</tbody>
@@ -242,7 +285,7 @@ include DTW_PLUGIN_DIR . 'templates/admin/partials/header.php';
 
 			<?php if ( $debug_mode ) : ?>
 				<h3 class="dtw-card__title"><?php esc_html_e( 'Event payloads', 'data-tracker-woocommerce' ); ?></h3>
-				<pre class="dtw-test-preview"><?php echo esc_html( wp_json_encode( $recent_events, JSON_PRETTY_PRINT ) ); ?></pre>
+				<pre class="dtw-test-preview"><?php echo esc_html( wp_json_encode( $activity, JSON_PRETTY_PRINT ) ); ?></pre>
 			<?php endif; ?>
 
 			<h3 class="dtw-card__title"><?php esc_html_e( 'Tracking IDs', 'data-tracker-woocommerce' ); ?></h3>
