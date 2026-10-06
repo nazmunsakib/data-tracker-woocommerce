@@ -105,6 +105,23 @@ class PageContext {
 		if ( function_exists( 'is_product' ) && is_product() ) {
 			return 'product';
 		}
+
+		// Custom/block themes may host cart and checkout on arbitrary pages
+		// where is_cart()/is_checkout() return false. Detect the WooCommerce
+		// cart/checkout blocks or shortcodes in the page content.
+		$post = get_post();
+
+		if ( $post ) {
+			$content = is_string( $post->post_content ) ? $post->post_content : '';
+
+			if ( has_block( 'woocommerce/checkout', $content ) || has_shortcode( $content, 'woocommerce_checkout' ) ) {
+				return 'checkout';
+			}
+			if ( has_block( 'woocommerce/cart', $content ) || has_shortcode( $content, 'woocommerce_cart' ) ) {
+				return 'cart';
+			}
+		}
+
 		return 'other';
 	}
 
