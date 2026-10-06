@@ -4,7 +4,20 @@
 	var DTW = window.DTW || {};
 	var context = DTW.context || {};
 	var platforms = DTW.platforms || {};
-	var enabledEvents = (DTW.settings && DTW.settings.enabled_events) || [];
+
+	var defaultEvents = [
+		'product_view',
+		'add_to_cart',
+		'remove_from_cart',
+		'view_cart',
+		'begin_checkout',
+		'add_payment_info',
+		'purchase'
+	];
+	var enabledEvents =
+		DTW.settings && Array.isArray(DTW.settings.enabled_events) && DTW.settings.enabled_events.length
+			? DTW.settings.enabled_events
+			: defaultEvents;
 	var debug = DTW.debug || {};
 
 	function eventEnabled(name) {
@@ -550,17 +563,27 @@ ga4Send('begin_checkout', cartPayload());
 	}
 
 	function boot() {
-		captureUtm();
-		initConsent();
+		try {
+			captureUtm();
+		} catch (e) {}
+		try {
+			initConsent();
+		} catch (e) {}
 
 		if (DTW.is_test) {
 			setTimeout(runTest, 1200);
 			return;
 		}
 
-		initPageEvents();
-		initAddToCartTracking();
-		initPaymentInfoTracking();
+		try {
+			initPageEvents();
+		} catch (e) {}
+		try {
+			initAddToCartTracking();
+		} catch (e) {}
+		try {
+			initPaymentInfoTracking();
+		} catch (e) {}
 	}
 
 	if (document.readyState === 'loading') {

@@ -87,6 +87,11 @@ class TestTracking {
 
 		$any_connected = $this->platforms->has_any_connected();
 
+		$consent = array(
+			'enabled'       => (bool) $this->options->get( 'respect_consent' ),
+			'api_available' => function_exists( 'wp_has_consent' ),
+		);
+
 		include DTW_PLUGIN_DIR . 'templates/admin/test-tracking.php';
 	}
 }

@@ -21,7 +21,7 @@ delete_transient( 'dtw_duplicate_scan' );
 
 global $wpdb;
 
-$meta_keys = array( '_dtw_attribution', '_dtw_source', '_dtw_medium', '_dtw_campaign', '_dtw_first_touch', '_dtw_last_touch' );
+$meta_keys = array( '_dtw_attribution', '_dtw_source', '_dtw_medium', '_dtw_campaign', '_dtw_first_touch', '_dtw_last_touch', '_dtw_purchase_logged' );
 
 $placeholders = implode( ', ', array_fill( 0, count( $meta_keys ), '%s' ) );
 

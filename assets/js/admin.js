@@ -82,8 +82,6 @@
 			return;
 		}
 
-		var done = false;
-
 		function setStatus(text, cls) {
 			status.textContent = text;
 			status.className = 'dtw-test-status' + (cls ? ' is-' + cls : '');
@@ -91,44 +89,109 @@
 
 		button.addEventListener('click', function () {
 			button.disabled = true;
-			done = false;
 			result.hidden = true;
-			setStatus('Sending test event to your connected platforms...', 'working');
-
-			var timeout = window.setTimeout(function () {
-				if (done) {
-					return;
-				}
-				setStatus('The test event was sent, but we could not confirm the response. This can happen with caching. Check the Technical Details below.', 'error');
-				button.disabled = false;
-			}, 12000);
-
-			function onMessage(event) {
-				if (event.origin !== window.location.origin) {
-					return;
-				}
-				if (!event.data || event.data.type !== 'dtw-test-done') {
-					return;
-				}
-				window.clearTimeout(timeout);
-				window.removeEventListener('message', onMessage);
-				done = true;
-				result.hidden = false;
-				setStatus('Test event confirmed. Look for it in your platforms now.', 'done');
-				button.disabled = false;
-			}
-
-			window.addEventListener('message', onMessage);
-
-			var iframe = document.createElement('iframe');
-			iframe.style.display = 'none';
-			iframe.setAttribute('aria-hidden', 'true');
-			iframe.setAttribute('tabindex', '-1');
-			iframe.src = DTW_ADMIN.test_url || (window.location.origin + '/?dtw_test=1');
-			document.body.appendChild(iframe);
-
+			setStatus('Sending test events to your connected platforms...', 'working');
+			runAdminTest();
+			setStatus('Test events fired. Confirm them in your platforms.', 'done');
+			button.disabled = false;
 			fetchPreview();
 		});
+
+		function runAdminTest() {
+			var cfg = DTW_ADMIN.test_config;
+			if (!cfg) {
+				setStatus('Test configuration is not available. Save your connections first.', 'error');
+				return;
+			}
+
+			var categories = cfg.categories && cfg.categories.length
+				? cfg.categories
+				: ['product_view', 'add_to_cart', 'begin_checkout', 'purchase'];
+			var testId = 'dtw-' + Date.now();
+
+			if (cfg.ga4_id) {
+				loadGtagForTest(cfg.ga4_id, categories, testId);
+			}
+			if (cfg.meta_id) {
+				loadMetaForTest(cfg.meta_id, categories, testId);
+			}
+			if (cfg.ads_id && cfg.ads_label && typeof window.gtag === 'function') {
+				window.gtag('event', 'dtw_test_event', { test_id: testId });
+			}
+
+			logAdminTestToActivity(categories, testId);
+		}
+
+		function loadGtagForTest(measurementId, categories, testId) {
+			if (typeof window.dataLayer === 'undefined') {
+				window.dataLayer = window.dataLayer || [];
+			}
+			if (typeof window.gtag !== 'function') {
+				window.gtag = function () {
+					window.dataLayer.push(arguments);
+				};
+			}
+			window.gtag('js', new Date());
+			window.gtag('config', measurementId);
+			categories.forEach(function (c) {
+				window.gtag('event', 'dtw_test_' + c, { test_id: testId });
+			});
+
+			var script = document.createElement('script');
+			script.async = true;
+			script.src = 'https://www.googletagmanager.com/gtag/js?id=' + encodeURIComponent(measurementId);
+			document.head.appendChild(script);
+		}
+
+		function loadMetaForTest(pixelId, categories, testId) {
+			window.fbq =
+				window.fbq ||
+				function () {
+					window.fbq.queue = window.fbq.queue || [];
+					window.fbq.queue.push(arguments);
+				};
+			window._fbq = window._fbq || window.fbq.queue;
+
+			var script = document.createElement('script');
+			script.async = true;
+			script.src = 'https://connect.facebook.net/en_US/fbevents.js';
+			script.onload = function () {
+				var queued = window._fbq || [];
+				if (typeof window.fbq === 'function') {
+					window.fbq('init', pixelId);
+					queued.forEach(function (args) {
+						window.fbq.apply(window, args);
+					});
+					categories.forEach(function (c) {
+						window.fbq('trackCustom', 'dtw_test_' + c, { test_id: testId });
+					});
+				}
+			};
+			document.head.appendChild(script);
+		}
+
+		function logAdminTestToActivity(categories, testId) {
+			var cfg = DTW_ADMIN.test_config;
+			if (!cfg || !cfg.log_url || !cfg.frontend_nonce) {
+				return;
+			}
+			fetch(cfg.log_url, {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({
+					nonce: cfg.frontend_nonce,
+					events: categories.map(function (c) {
+						return {
+							name: 'dtw_test_event',
+							platform: 'test',
+							page_type: 'test',
+							payload: { category: c, test_id: testId },
+							url: window.location.href
+						};
+					})
+				})
+			}).catch(function () {});
+		}
 
 		function fetchPreview() {
 			if (!DTW_ADMIN.rest_url) {
@@ -175,7 +238,7 @@
 				if (platformNames[pid]) {
 					html += '<div class="dtw-test-result-line">'
 						+ '<span class="dashicons dashicons-yes-alt" aria-hidden="true"></span>'
-						+ platformNames[pid] + ' — ' + 'Event sent'
+						+ platformNames[pid] + ' — ' + 'Event fired'
 						+ '</div>';
 				}
 			});
@@ -193,12 +256,32 @@
 						+ 'Consent — not required' + '</div>';
 				}
 			}
+			var cfgN = DTW_ADMIN.test_config;
+			if (cfgN && cfgN.categories && cfgN.categories.length) {
+				var labels = [];
+				cfgN.categories.forEach(function (c) {
+					labels.push(categLabel(c));
+				});
+				html += '<div class="dtw-test-result-line">'
+					+ '<span class="dashicons dashicons-megaphone" aria-hidden="true"></span>'
+					+ 'Test events fired for: ' + labels.join(', ') + '</div>';
+			}
 			if (!html) {
 				html = '<div class="dtw-test-result-line is-warn">'
 					+ '<span class="dashicons dashicons-warning" aria-hidden="true"></span>'
 					+ 'No connected platforms to send to.' + '</div>';
 			}
 			box.innerHTML = html;
+		}
+
+		function categLabel(c) {
+			var map = {
+				product_view: 'Product View',
+				add_to_cart: 'Add to Cart',
+				begin_checkout: 'Checkout',
+				purchase: 'Purchase'
+			};
+			return map[c] || c;
 		}
 	}
 

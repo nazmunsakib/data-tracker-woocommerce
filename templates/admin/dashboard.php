@@ -39,6 +39,7 @@ $platform_labels = array(
 	'ga4'        => 'Google Analytics',
 	'meta'       => 'Meta Pixel',
 	'google_ads' => 'Google Ads',
+	'woocommerce' => 'WooCommerce',
 );
 
 $has_problems = ! empty( $problems );
@@ -163,8 +164,11 @@ foreach ( $platform_cards as $card ) {
 			</div>
 			<?php if ( empty( $activity ) ) : ?>
 				<p class="dtw-card__desc">
-					<?php esc_html_e( 'No tracking activity yet. As soon as visitors interact with your store, recent tracking events will appear here.', 'data-tracker-woocommerce' ); ?>
+					<?php esc_html_e( 'No tracking activity yet. Activity appears when the tracking script runs on your store — for example when a shopper views a product or checks out. Orders created manually from the WooCommerce admin do not produce tracking events.', 'data-tracker-woocommerce' ); ?>
 				</p>
+				<a class="dtw-btn dtw-btn--small dtw-btn--primary" href="<?php echo esc_url( admin_url( 'admin.php?page=data-tracker-test' ) ); ?>">
+					<?php esc_html_e( 'Run a Tracking Test', 'data-tracker-woocommerce' ); ?>
+				</a>
 			<?php else : ?>
 				<ul class="dtw-activity-list">
 					<?php foreach ( $activity as $item ) : ?>
@@ -174,7 +178,7 @@ foreach ( $platform_cards as $card ) {
 						$order_id = isset( $payload['transaction_id'] ) ? $payload['transaction_id'] : ( isset( $payload['id'] ) ? $payload['id'] : '' );
 						$value    = isset( $payload['value'] ) ? $payload['value'] : '';
 						$currency = isset( $payload['currency'] ) ? $payload['currency'] : '';
-						$items    = isset( $payload['items'] ) && is_array( $payload['items'] ) ? count( $payload['items'] ) : '';
+						$items    = isset( $payload['items'] ) && is_array( $payload['items'] ) ? count( $payload['items'] ) : ( isset( $payload['item_count'] ) ? $payload['item_count'] : '' );
 						?>
 						<li class="dtw-activity">
 							<span class="dtw-activity__check" aria-hidden="true"><span class="dashicons dashicons-yes-alt"></span></span>
@@ -185,7 +189,13 @@ foreach ( $platform_cards as $card ) {
 										<span class="dtw-activity__platform">—</span>
 									<?php else : ?>
 										<?php foreach ( $item['platforms'] as $pid ) : ?>
-											<span class="dtw-activity__platform"><?php echo esc_html( isset( $platform_labels[ $pid ] ) ? $platform_labels[ $pid ] : $pid ); ?> ✓</span>
+											<?php if ( 'woocommerce' === $pid ) : ?>
+												<span class="dtw-activity__platform dtw-activity__platform--source"><?php esc_html_e( 'WooCommerce order', 'data-tracker-woocommerce' ); ?></span>
+											<?php elseif ( 'test' === $pid ) : ?>
+												<span class="dtw-activity__platform dtw-activity__platform--source"><?php esc_html_e( 'Manual test', 'data-tracker-woocommerce' ); ?></span>
+											<?php else : ?>
+												<span class="dtw-activity__platform"><?php echo esc_html( isset( $platform_labels[ $pid ] ) ? $platform_labels[ $pid ] : $pid ); ?> ✓</span>
+											<?php endif; ?>
 										<?php endforeach; ?>
 									<?php endif; ?>
 								</span>

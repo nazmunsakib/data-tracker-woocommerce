@@ -264,6 +264,10 @@ The plugin is designed for modern WooCommerce environments. Compatibility should
 
 The plugin is designed to track WooCommerce purchases regardless of whether the customer creates an account, while respecting available consent and tracking configuration.
 
+= I placed an order but Recent Activity is empty. Why? =
+
+Recent Activity shows events reported by the tracking script that runs on your storefront. Orders created **manually from the WooCommerce admin order screen** do not run the tracking script, so they do not create activity. A purchase is also only recorded once the order reaches a confirmed state (paid/processing/completed/on-hold) — not for pending, failed or cancelled orders. Use **Test Tracking** to send a test event, and place a real order through your storefront checkout to see purchase activity appear.
+
 = Does it collect customer information? =
 
 The plugin is designed to collect only the information required for its tracking and attribution functionality. It should not be used as a customer database or CRM.

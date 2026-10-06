@@ -166,10 +166,46 @@ class Admin {
 			'dtw-admin',
 			'DTW_ADMIN',
 			array(
-				'rest_url'   => esc_url_raw( rest_url( 'data-tracker/v1' ) ),
-				'rest_nonce' => wp_create_nonce( 'wp_rest' ),
-				'test_url'   => esc_url_raw( add_query_arg( 'dtw_test', '1', home_url( '/' ) ) ),
+				'rest_url'    => esc_url_raw( rest_url( 'data-tracker/v1' ) ),
+				'rest_nonce'  => wp_create_nonce( 'wp_rest' ),
+				'test_url'    => esc_url_raw( add_query_arg( 'dtw_test', '1', home_url( '/' ) ) ),
+				'test_config' => $this->test_config(),
 			)
+		);
+	}
+
+	/**
+	 * Data used to fire direct tracking test events from the Test page.
+	 *
+	 * @return array|null
+	 */
+	private function test_config() {
+		$screen       = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
+		$is_test_page = ( $screen && false !== strpos( (string) $screen->id, 'data-tracker-test' ) )
+			|| ( isset( $_GET['page'] ) && 'data-tracker-test' === $_GET['page'] );
+
+		if ( ! $is_test_page ) {
+			return null;
+		}
+
+		$ga4  = $this->platforms->get( 'ga4' );
+		$meta = $this->platforms->get( 'meta' );
+		$ads  = $this->platforms->get( 'google_ads' );
+
+		return array(
+			'ga4_id'        => $ga4->is_connected() ? $ga4->get_measurement_id() : '',
+			'meta_id'       => $meta->is_connected() ? $meta->get_pixel_id() : '',
+			'ads_id'        => $ads->is_connected() ? $ads->get_conversion_id() : '',
+			'ads_label'     => $ads->is_connected() ? $ads->get_conversion_label() : '',
+			'consent'       => (bool) $this->options->get( 'respect_consent' ),
+			'categories'    => array_values(
+				array_intersect(
+					array( 'product_view', 'add_to_cart', 'begin_checkout', 'purchase' ),
+					(array) $this->options->get( 'enabled_events' )
+				)
+			),
+			'frontend_nonce' => wp_create_nonce( 'dtw_frontend' ),
+			'log_url'        => esc_url_raw( rest_url( 'data-tracker/v1/events' ) ),
 		);
 	}
 
