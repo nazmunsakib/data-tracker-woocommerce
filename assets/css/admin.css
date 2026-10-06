@@ -202,12 +202,6 @@ body.dtw-admin {
 	grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
-.dtw-hero {
-	display: grid;
-	gap: 18px;
-	margin: 0 0 22px;
-}
-
 @media (max-width: 1200px) {
 	.dtw-grid-3 {
 		grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -216,8 +210,7 @@ body.dtw-admin {
 
 @media (max-width: 782px) {
 	.dtw-grid-2,
-	.dtw-grid-3,
-	.dtw-hero {
+	.dtw-grid-3 {
 		grid-template-columns: 1fr;
 	}
 	.dtw-app {
@@ -480,40 +473,164 @@ body.dtw-admin {
 	font-size: 13px;
 }
 
-/* ---------- Health ---------- */
-.dtw-health-card {
-	text-align: center;
-	display: flex;
-	flex-direction: column;
+/* ---------- Status hero ---------- */
+.dtw-status-hero {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) auto;
+	gap: 28px;
 	align-items: center;
-	justify-content: center;
+	padding: 28px 28px;
+	margin-bottom: 26px;
 }
 
-.dtw-health-score {
-	--dtw-score: 0;
-	width: 132px;
-	height: 132px;
-	margin: 6px auto 16px;
-	border-radius: 50%;
+.dtw-status-headline {
 	display: flex;
 	align-items: center;
-	justify-content: center;
-	background:
-		radial-gradient(closest-side, #fff 77%, transparent 79% 99%),
-		conic-gradient(var(--dtw-brand) calc(var(--dtw-score) * 1%), #e2e8f0 0);
-}
-
-.dtw-health-score__value {
-	font-size: 32px;
+	gap: 12px;
+	margin: 0 0 6px;
+	font-size: 24px;
 	font-weight: 800;
-	color: var(--dtw-ink);
 	letter-spacing: -0.02em;
 }
 
-.dtw-health-summary {
+.dtw-status-headline__icon {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 34px;
+	height: 34px;
+	border-radius: 10px;
+	background: #ecfdf5;
+	border: 1px solid #a7f3d0;
+	color: #047857;
+	flex: none;
+}
+
+.dtw-status-headline__icon .dashicons {
+	font-size: 18px;
+	width: 18px;
+	height: 18px;
+}
+
+.dtw-status-text {
 	font-size: 14px;
 	color: var(--dtw-muted);
-	margin: 0 0 14px;
+	margin: 0 0 16px;
+	max-width: 560px;
+}
+
+.dtw-status-delivery {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+	margin: 0 0 18px;
+}
+
+.dtw-status-delivery__item {
+	display: inline-flex;
+	align-items: center;
+	gap: 5px;
+	font-size: 12px;
+	font-weight: 600;
+	color: #047857;
+	background: #ecfdf5;
+	border: 1px solid #a7f3d0;
+	border-radius: 999px;
+	padding: 3px 10px;
+}
+
+.dtw-status-delivery__item .dashicons {
+	font-size: 14px;
+	width: 14px;
+	height: 14px;
+}
+
+.dtw-status-actions {
+	margin: 0;
+}
+
+.dtw-status-hero__side {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 8px;
+	padding: 12px 8px;
+	border: 1px solid var(--dtw-line);
+	border-radius: var(--dtw-radius);
+	background: #f8fafc;
+	min-width: 180px;
+}
+
+.dtw-status-hero__ring {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 2px;
+}
+
+.dtw-status-hero__ring .dtw-health-score {
+	margin: 0 0 4px;
+	width: 108px;
+	height: 108px;
+}
+
+.dtw-status-hero__ring .dtw-health-score__value {
+	font-size: 26px;
+}
+
+.dtw-status-hero__ring-label {
+	font-size: 11px;
+	font-weight: 700;
+	text-transform: uppercase;
+	letter-spacing: 0.6px;
+	color: var(--dtw-muted);
+}
+
+.dtw-status-verified {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	margin: 4px 0 0;
+	font-size: 12px;
+	color: var(--dtw-muted);
+}
+
+.dtw-status-verified .dashicons {
+	color: var(--dtw-ok);
+	font-size: 15px;
+	width: 15px;
+	height: 15px;
+}
+
+.dtw-status-verified strong {
+	color: var(--dtw-ink);
+}
+
+@media (max-width: 900px) {
+	.dtw-status-hero {
+		grid-template-columns: 1fr;
+		gap: 20px;
+	}
+
+	.dtw-status-hero__side {
+		min-width: 0;
+	}
+}
+
+.dtw-span-2 {
+	grid-column: span 2;
+}
+
+@media (max-width: 1200px) {
+	.dtw-span-2 {
+		grid-column: span 2;
+	}
+}
+
+@media (max-width: 782px) {
+	.dtw-span-2 {
+		grid-column: auto;
+	}
 }
 
 /* ---------- Problems ---------- */
@@ -1015,34 +1132,6 @@ body.dtw-admin {
 	margin: 0 auto 18px;
 }
 
-/* ---------- Health card extras ---------- */
-.dtw-health-issues {
-	display: inline-flex;
-	align-items: center;
-	gap: 6px;
-	margin: 0 0 8px;
-	padding: 4px 12px;
-	border-radius: 999px;
-	background: #fef3c7;
-	color: #92400e;
-	font-size: 12px;
-	font-weight: 600;
-}
-
-.dtw-health-tested {
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	gap: 6px;
-	margin: 0 0 14px;
-	font-size: 13px;
-	color: var(--dtw-muted);
-}
-
-.dtw-health-tested .dashicons {
-	color: var(--dtw-ok);
-}
-
 /* ---------- Recent activity ---------- */
 .dtw-activity-list {
 	margin: 6px 0 0;
@@ -1371,4 +1460,23 @@ body.dtw-admin {
 	font-size: 16px;
 	width: 16px;
 	height: 16px;
+}
+
+/* ---------- Focus & navigation ---------- */
+.dtw-app a:focus-visible,
+.dtw-app button:focus-visible,
+.dtw-app summary:focus-visible,
+.dtw-app input:focus-visible,
+.dtw-app select:focus-visible {
+	outline: 2px solid var(--dtw-brand);
+	outline-offset: 2px;
+	border-radius: 6px;
+}
+
+.dtw-app summary:focus-visible {
+	outline-offset: 4px;
+}
+
+#dtw-problems {
+	scroll-margin-top: 16px;
 }

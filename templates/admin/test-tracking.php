@@ -76,7 +76,8 @@ include DTW_PLUGIN_DIR . 'templates/admin/partials/header.php';
 			<h2 class="dtw-card__title"><?php esc_html_e( 'Send a test event', 'data-tracker-woocommerce' ); ?></h2>
 			<span class="dtw-badge dtw-badge--info"><?php esc_html_e( 'Recommended', 'data-tracker-woocommerce' ); ?></span>
 		</div>
-		<p><?php esc_html_e( 'This opens your store and sends a test event through Google Analytics and Meta. Then confirm it inside their testing tools.', 'data-tracker-woocommerce' ); ?></p>
+		<p><?php esc_html_e( 'This tests your real tracking pipeline — the same code that tracks your store visitors. It sends an identifiable test event to your connected platforms.', 'data-tracker-woocommerce' ); ?></p>
+		<p class="dtw-card__desc"><?php esc_html_e( 'No test purchase order is created and no fake revenue or conversion is sent.', 'data-tracker-woocommerce' ); ?></p>
 		<p>
 			<button type="button" id="dtw-send-test" class="dtw-btn dtw-btn--primary dtw-btn--large" <?php disabled( ! $any_connected ); ?>>
 				<span class="dashicons dashicons-send" aria-hidden="true"></span>

@@ -40,6 +40,34 @@ $platform_labels = array(
 	'meta'       => 'Meta Pixel',
 	'google_ads' => 'Google Ads',
 );
+
+$has_problems = ! empty( $problems );
+
+if ( ! $connected ) {
+	$status_headline = __( "Your tracking isn't set up yet", 'data-tracker-woocommerce' );
+	$status_text     = __( 'Connect Google Analytics, Meta Pixel or Google Ads to start tracking WooCommerce events automatically.', 'data-tracker-woocommerce' );
+	$status_icon     = 'dashicons-plugins-checked';
+} elseif ( $has_problems ) {
+	$status_headline = __( 'Tracking needs attention', 'data-tracker-woocommerce' );
+	/* translators: %d: number of issues */
+	$status_text     = sprintf( _n( '%d issue may affect your conversion data.', '%d issues may affect your conversion data.', $issue_count, 'data-tracker-woocommerce' ), $issue_count );
+	$status_icon     = 'dashicons-warning';
+} elseif ( ! $last_tested ) {
+	$status_headline = __( "Tracking hasn't been verified yet", 'data-tracker-woocommerce' );
+	$status_text     = __( 'Run a test to confirm your events are reaching your connected platforms.', 'data-tracker-woocommerce' );
+	$status_icon     = 'dashicons-hourglass';
+} else {
+	$status_headline = __( 'Tracking is healthy', 'data-tracker-woocommerce' );
+	$status_text     = __( 'Your WooCommerce tracking is working normally.', 'data-tracker-woocommerce' );
+	$status_icon     = 'dashicons-yes-alt';
+}
+
+$connected_labels = array();
+foreach ( $platform_cards as $card ) {
+	if ( $card['connected'] ) {
+		$connected_labels[] = $card['label'];
+	}
+}
 ?>
 
 	<?php if ( '' !== $error_msg ) : ?>
@@ -53,66 +81,58 @@ $platform_labels = array(
 		</div>
 	<?php endif; ?>
 
-	<?php if ( ! $connected ) : ?>
-		<div class="dtw-card dtw-empty">
-			<div class="dtw-empty__icon"><span class="dashicons dashicons-plugins-checked" aria-hidden="true"></span></div>
-			<h2 class="dtw-empty__title"><?php esc_html_e( "Your tracking isn't connected yet.", 'data-tracker-woocommerce' ); ?></h2>
-			<p class="dtw-empty__text">
-				<?php esc_html_e( 'Connect Google Analytics, Meta Pixel, or Google Ads to get started. Store events are tracked automatically after that.', 'data-tracker-woocommerce' ); ?>
-			</p>
-			<a class="dtw-btn dtw-btn--primary dtw-btn--large" href="<?php echo esc_url( admin_url( 'admin.php?page=data-tracker-connections' ) ); ?>">
-				<span class="dashicons dashicons-plugins-checked" aria-hidden="true"></span>
-				<?php esc_html_e( 'Connect Platform', 'data-tracker-woocommerce' ); ?>
-			</a>
-		</div>
-	<?php endif; ?>
+	<div class="dtw-card dtw-status-hero">
+		<div class="dtw-status-hero__main">
+			<h2 class="dtw-status-headline">
+				<span class="dtw-status-headline__icon" aria-hidden="true"><span class="dashicons <?php echo esc_attr( $status_icon ); ?>"></span></span>
+				<?php echo esc_html( $status_headline ); ?>
+			</h2>
+			<p class="dtw-status-text"><?php echo esc_html( $status_text ); ?></p>
 
-	<div class="dtw-hero dtw-grid-2">
-		<div class="dtw-card dtw-health-card">
-			<div class="dtw-health-score" style="--dtw-score: <?php echo (int) $score; ?>">
-				<div class="dtw-health-score__value"><?php echo (int) $score; ?>%</div>
-			</div>
-			<h2 class="dtw-card__title"><?php esc_html_e( 'Tracking Health', 'data-tracker-woocommerce' ); ?></h2>
-			<p class="dtw-health-summary"><?php echo esc_html( $summary ); ?></p>
-
-			<?php if ( $issue_count > 0 ) : ?>
-				<p class="dtw-health-issues">
-					<span class="dashicons dashicons-warning" aria-hidden="true"></span>
-					<?php
-					/* translators: %d: number of issues */
-					echo esc_html( sprintf( _n( '%d issue needs attention', '%d issues need attention', $issue_count, 'data-tracker-woocommerce' ), $issue_count ) );
-					?>
+			<?php if ( $connected ) : ?>
+				<p class="dtw-status-delivery" aria-label="<?php esc_attr_e( 'Connected platforms', 'data-tracker-woocommerce' ); ?>">
+					<?php foreach ( $connected_labels as $label ) : ?>
+						<span class="dtw-status-delivery__item"><span class="dashicons dashicons-yes-alt" aria-hidden="true"></span><?php echo esc_html( $label ); ?></span>
+					<?php endforeach; ?>
 				</p>
 			<?php endif; ?>
 
-			<p class="dtw-health-tested">
-				<span class="dashicons <?php echo $last_tested ? 'dashicons-yes-alt' : 'dashicons-hourglass'; ?>" aria-hidden="true"></span>
-				<?php esc_html_e( 'Last tracking test:', 'data-tracker-woocommerce' ); ?>
-				<strong><?php echo esc_html( \DataTracker\Diagnostics\EventLog::relative_time( $last_tested ) ); ?></strong>
-			</p>
-
-			<a class="dtw-btn dtw-btn--primary" href="<?php echo esc_url( admin_url( 'admin.php?page=data-tracker-test' ) ); ?>">
-				<span class="dashicons dashicons-clipboard" aria-hidden="true"></span>
-				<?php esc_html_e( 'Test Tracking', 'data-tracker-woocommerce' ); ?>
-			</a>
+			<div class="dtw-button-row dtw-status-actions">
+				<?php if ( ! $connected ) : ?>
+					<a class="dtw-btn dtw-btn--primary dtw-btn--large" href="<?php echo esc_url( admin_url( 'admin.php?page=data-tracker-connections' ) ); ?>">
+						<span class="dashicons dashicons-plugins-checked" aria-hidden="true"></span>
+						<?php esc_html_e( 'Connect Platform', 'data-tracker-woocommerce' ); ?>
+					</a>
+				<?php elseif ( $has_problems ) : ?>
+					<a class="dtw-btn dtw-btn--primary dtw-btn--large" href="#dtw-problems">
+						<span class="dashicons dashicons-warning" aria-hidden="true"></span>
+						<?php esc_html_e( 'Fix Issues', 'data-tracker-woocommerce' ); ?>
+					</a>
+					<a class="dtw-btn dtw-btn--ghost dtw-btn--large" href="<?php echo esc_url( admin_url( 'admin.php?page=data-tracker-test' ) ); ?>">
+						<span class="dashicons dashicons-clipboard" aria-hidden="true"></span>
+						<?php esc_html_e( 'Test Tracking', 'data-tracker-woocommerce' ); ?>
+					</a>
+				<?php else : ?>
+					<a class="dtw-btn dtw-btn--primary dtw-btn--large" href="<?php echo esc_url( admin_url( 'admin.php?page=data-tracker-test' ) ); ?>">
+						<span class="dashicons dashicons-clipboard" aria-hidden="true"></span>
+						<?php esc_html_e( 'Test Tracking', 'data-tracker-woocommerce' ); ?>
+					</a>
+				<?php endif; ?>
+			</div>
 		</div>
 
-		<div class="dtw-card">
-			<div class="dtw-card__head">
-				<h2 class="dtw-card__title"><?php esc_html_e( 'WooCommerce Tracking', 'data-tracker-woocommerce' ); ?></h2>
-				<a class="dtw-link" href="<?php echo esc_url( admin_url( 'admin.php?page=data-tracker-tracking' ) ); ?>"><?php esc_html_e( 'Manage', 'data-tracker-woocommerce' ); ?></a>
+		<div class="dtw-status-hero__side">
+			<div class="dtw-status-hero__ring" aria-hidden="true">
+				<div class="dtw-health-score" style="--dtw-score: <?php echo (int) $score; ?>">
+					<span class="dtw-health-score__value"><?php echo (int) $score; ?>%</span>
+				</div>
+				<span class="dtw-status-hero__ring-label"><?php esc_html_e( 'Tracking Health', 'data-tracker-woocommerce' ); ?></span>
 			</div>
-			<ul class="dtw-status-list">
-				<?php foreach ( $event_status as $event ) : ?>
-					<li class="dtw-status <?php echo $event['enabled'] ? 'is-ok' : 'is-off'; ?>">
-						<span class="dtw-status__dot" aria-hidden="true"></span>
-						<span class="dtw-status__label"><?php echo esc_html( $event['label'] ); ?></span>
-						<span class="dtw-badge <?php echo $event['enabled'] ? 'dtw-badge--ok' : 'dtw-badge--muted'; ?>">
-							<?php echo $event['enabled'] ? esc_html__( 'Working', 'data-tracker-woocommerce' ) : esc_html__( 'Off', 'data-tracker-woocommerce' ); ?>
-						</span>
-					</li>
-				<?php endforeach; ?>
-			</ul>
+			<p class="dtw-status-verified">
+				<span class="dashicons <?php echo $last_tested ? 'dashicons-yes-alt' : 'dashicons-hourglass'; ?>" aria-hidden="true"></span>
+				<?php esc_html_e( 'Last verified:', 'data-tracker-woocommerce' ); ?>
+				<strong><?php echo esc_html( \DataTracker\Diagnostics\EventLog::relative_time( $last_tested ) ); ?></strong>
+			</p>
 		</div>
 	</div>
 
@@ -135,73 +155,93 @@ $platform_labels = array(
 		<?php endforeach; ?>
 	</div>
 
-	<div class="dtw-card dtw-card--activity">
-		<div class="dtw-card__head">
-			<h2 class="dtw-card__title"><?php esc_html_e( 'Recent Activity', 'data-tracker-woocommerce' ); ?></h2>
-			<span class="dtw-badge dtw-badge--info"><?php esc_html_e( 'Live', 'data-tracker-woocommerce' ); ?></span>
-		</div>
-		<?php if ( empty( $activity ) ) : ?>
-			<p class="dtw-card__desc">
-				<?php esc_html_e( 'No activity yet. Visit your store or run a tracking test to generate events.', 'data-tracker-woocommerce' ); ?>
-			</p>
-		<?php else : ?>
-			<ul class="dtw-activity-list">
-				<?php foreach ( $activity as $item ) : ?>
-					<?php
-					$label    = isset( $activity_labels[ $item['name'] ] ) ? $activity_labels[ $item['name'] ] : ucwords( str_replace( '_', ' ', $item['name'] ) );
-					$payload  = $item['payload'];
-					$order_id = isset( $payload['transaction_id'] ) ? $payload['transaction_id'] : ( isset( $payload['id'] ) ? $payload['id'] : '' );
-					$value    = isset( $payload['value'] ) ? $payload['value'] : '';
-					$currency = isset( $payload['currency'] ) ? $payload['currency'] : '';
-					$items    = isset( $payload['items'] ) && is_array( $payload['items'] ) ? count( $payload['items'] ) : '';
-					?>
-					<li class="dtw-activity">
-						<span class="dtw-activity__check" aria-hidden="true"><span class="dashicons dashicons-yes-alt"></span></span>
-						<div class="dtw-activity__main">
-							<span class="dtw-activity__name"><?php echo esc_html( $label ); ?></span>
-							<span class="dtw-activity__platforms">
-								<?php if ( empty( $item['platforms'] ) ) : ?>
-									<span class="dtw-activity__platform">—</span>
-								<?php else : ?>
-									<?php foreach ( $item['platforms'] as $pid ) : ?>
-										<span class="dtw-activity__platform"><?php echo esc_html( isset( $platform_labels[ $pid ] ) ? $platform_labels[ $pid ] : $pid ); ?> ✓</span>
-									<?php endforeach; ?>
-								<?php endif; ?>
-							</span>
-							<?php if ( 'purchase' === $item['name'] ) : ?>
-								<span class="dtw-activity__meta">
-									<?php
-									printf(
-										/* translators: 1: order id, 2: value, 3: currency */
-										esc_html__( 'Order #%1$s · %2$s %3$s', 'data-tracker-woocommerce' ),
-										esc_html( $order_id ? $order_id : '—' ),
-										esc_html( '' !== $value ? round( (float) $value, 2 ) : '—' ),
-										esc_html( $currency ? $currency : '' )
-									);
-									?>
-									<?php if ( '' !== $items ) : ?>
-										<em><?php echo esc_html( sprintf( /* translators: %d: item count */ _n( '(%d item)', '(%d items)', $items, 'data-tracker-woocommerce' ), $items ) ); ?></em>
+	<div class="dtw-grid dtw-grid-3">
+		<div class="dtw-card dtw-card--activity dtw-span-2">
+			<div class="dtw-card__head">
+				<h2 class="dtw-card__title"><?php esc_html_e( 'Recent Activity', 'data-tracker-woocommerce' ); ?></h2>
+				<span class="dtw-badge dtw-badge--info"><?php esc_html_e( 'Live', 'data-tracker-woocommerce' ); ?></span>
+			</div>
+			<?php if ( empty( $activity ) ) : ?>
+				<p class="dtw-card__desc">
+					<?php esc_html_e( 'No tracking activity yet. As soon as visitors interact with your store, recent tracking events will appear here.', 'data-tracker-woocommerce' ); ?>
+				</p>
+			<?php else : ?>
+				<ul class="dtw-activity-list">
+					<?php foreach ( $activity as $item ) : ?>
+						<?php
+						$label    = isset( $activity_labels[ $item['name'] ] ) ? $activity_labels[ $item['name'] ] : ucwords( str_replace( '_', ' ', $item['name'] ) );
+						$payload  = $item['payload'];
+						$order_id = isset( $payload['transaction_id'] ) ? $payload['transaction_id'] : ( isset( $payload['id'] ) ? $payload['id'] : '' );
+						$value    = isset( $payload['value'] ) ? $payload['value'] : '';
+						$currency = isset( $payload['currency'] ) ? $payload['currency'] : '';
+						$items    = isset( $payload['items'] ) && is_array( $payload['items'] ) ? count( $payload['items'] ) : '';
+						?>
+						<li class="dtw-activity">
+							<span class="dtw-activity__check" aria-hidden="true"><span class="dashicons dashicons-yes-alt"></span></span>
+							<div class="dtw-activity__main">
+								<span class="dtw-activity__name"><?php echo esc_html( $label ); ?></span>
+								<span class="dtw-activity__platforms">
+									<?php if ( empty( $item['platforms'] ) ) : ?>
+										<span class="dtw-activity__platform">—</span>
+									<?php else : ?>
+										<?php foreach ( $item['platforms'] as $pid ) : ?>
+											<span class="dtw-activity__platform"><?php echo esc_html( isset( $platform_labels[ $pid ] ) ? $platform_labels[ $pid ] : $pid ); ?> ✓</span>
+										<?php endforeach; ?>
 									<?php endif; ?>
 								</span>
+								<?php if ( 'purchase' === $item['name'] ) : ?>
+									<span class="dtw-activity__meta">
+										<?php
+										printf(
+											/* translators: 1: order id, 2: value, 3: currency */
+											esc_html__( 'Order #%1$s · %2$s %3$s', 'data-tracker-woocommerce' ),
+											esc_html( $order_id ? $order_id : '—' ),
+											esc_html( '' !== $value ? round( (float) $value, 2 ) : '—' ),
+											esc_html( $currency ? $currency : '' )
+										);
+										?>
+										<?php if ( '' !== $items ) : ?>
+											<em><?php echo esc_html( sprintf( /* translators: %d: item count */ _n( '(%d item)', '(%d items)', $items, 'data-tracker-woocommerce' ), $items ) ); ?></em>
+										<?php endif; ?>
+									</span>
+								<?php endif; ?>
+							</div>
+							<span class="dtw-activity__time"><?php echo esc_html( \DataTracker\Diagnostics\EventLog::relative_time( $item['time'] ) ); ?></span>
+							<?php if ( $debug_mode ) : ?>
+								<details class="dtw-activity__details">
+									<summary><?php esc_html_e( 'Technical', 'data-tracker-woocommerce' ); ?></summary>
+									<pre class="dtw-activity__json"><?php echo esc_html( wp_json_encode( $item['payload'], JSON_PRETTY_PRINT ) ); ?></pre>
+								</details>
 							<?php endif; ?>
-						</div>
-						<span class="dtw-activity__time"><?php echo esc_html( \DataTracker\Diagnostics\EventLog::relative_time( $item['time'] ) ); ?></span>
-						<?php if ( $debug_mode ) : ?>
-							<details class="dtw-activity__details">
-								<summary><?php esc_html_e( 'Technical', 'data-tracker-woocommerce' ); ?></summary>
-								<pre class="dtw-activity__json"><?php echo esc_html( wp_json_encode( $item['payload'], JSON_PRETTY_PRINT ) ); ?></pre>
-							</details>
-						<?php endif; ?>
+						</li>
+					<?php endforeach; ?>
+				</ul>
+			<?php endif; ?>
+		</div>
+
+		<div class="dtw-card">
+			<div class="dtw-card__head">
+				<h2 class="dtw-card__title"><?php esc_html_e( 'WooCommerce Tracking', 'data-tracker-woocommerce' ); ?></h2>
+				<a class="dtw-link" href="<?php echo esc_url( admin_url( 'admin.php?page=data-tracker-tracking' ) ); ?>"><?php esc_html_e( 'Manage', 'data-tracker-woocommerce' ); ?></a>
+			</div>
+			<ul class="dtw-status-list">
+				<?php foreach ( $event_status as $event ) : ?>
+					<li class="dtw-status <?php echo $event['enabled'] ? 'is-ok' : 'is-off'; ?>">
+						<span class="dtw-status__dot" aria-hidden="true"></span>
+						<span class="dtw-status__label"><?php echo esc_html( $event['label'] ); ?></span>
+						<span class="dtw-badge <?php echo $event['enabled'] ? 'dtw-badge--ok' : 'dtw-badge--muted'; ?>">
+							<?php echo $event['enabled'] ? esc_html__( 'Working', 'data-tracker-woocommerce' ) : esc_html__( 'Off', 'data-tracker-woocommerce' ); ?>
+						</span>
 					</li>
 				<?php endforeach; ?>
 			</ul>
-		<?php endif; ?>
+		</div>
 	</div>
 
-	<?php if ( ! empty( $problems ) ) : ?>
-		<div class="dtw-card">
+	<?php if ( $has_problems ) : ?>
+		<div class="dtw-card" id="dtw-problems">
 			<div class="dtw-card__head">
-				<h2 class="dtw-card__title"><?php esc_html_e( 'Things to check', 'data-tracker-woocommerce' ); ?></h2>
+				<h2 class="dtw-card__title"><?php echo esc_html( 1 === $issue_count ? __( '1 thing needs your attention', 'data-tracker-woocommerce' ) : sprintf( /* translators: %d */ __( '%d things need your attention', 'data-tracker-woocommerce' ), $issue_count ) ); ?></h2>
 			</div>
 			<?php foreach ( $problems as $problem ) : ?>
 				<div class="dtw-problem">
@@ -231,14 +271,20 @@ $platform_labels = array(
 		<div class="dtw-card dtw-card--success">
 			<p class="dtw-all-good">
 				<span class="dashicons dashicons-yes-alt" aria-hidden="true"></span>
-				<?php esc_html_e( 'No critical problems detected. Your tracking looks good.', 'data-tracker-woocommerce' ); ?>
+				<?php if ( $last_tested ) : ?>
+					<?php esc_html_e( 'Your tracking is verified. No action required.', 'data-tracker-woocommerce' ); ?>
+				<?php else : ?>
+					<?php esc_html_e( 'Everything is configured. Run a tracking test to verify it.', 'data-tracker-woocommerce' ); ?>
+				<?php endif; ?>
 			</p>
 		</div>
 	<?php endif; ?>
 
 	<?php if ( ! empty( $next_steps ) ) : ?>
 		<div class="dtw-card dtw-card--muted">
-			<h2 class="dtw-card__title"><?php esc_html_e( 'Next steps', 'data-tracker-woocommerce' ); ?></h2>
+			<div class="dtw-card__head">
+				<h2 class="dtw-card__title"><?php esc_html_e( 'Next step', 'data-tracker-woocommerce' ); ?></h2>
+			</div>
 			<ul class="dtw-next-steps">
 				<?php foreach ( $next_steps as $step ) : ?>
 					<li class="dtw-next-step">
@@ -306,7 +352,7 @@ $platform_labels = array(
 				<?php esc_html_e( 'WooCommerce:', 'data-tracker-woocommerce' ); ?>
 				<?php echo $wc_active && defined( 'WC_VERSION' ) ? esc_html( WC_VERSION ) : esc_html__( 'inactive', 'data-tracker-woocommerce' ); ?>
 				&middot;
-				<?php esc_html_e( 'Last tested:', 'data-tracker-woocommerce' ); ?>
+				<?php esc_html_e( 'Last verified:', 'data-tracker-woocommerce' ); ?>
 				<?php echo esc_html( \DataTracker\Diagnostics\EventLog::relative_time( $last_tested ) ); ?>
 			</p>
 		</div>
