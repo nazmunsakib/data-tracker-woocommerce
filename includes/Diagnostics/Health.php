@@ -127,6 +127,17 @@ class Health {
 			);
 		}
 
+		if ( $this->options->get( 'respect_consent' ) ) {
+			$checks[] = array(
+				'id'       => 'consent_mode',
+				'status'   => 'info',
+				'weight'   => 0,
+				'label'    => __( 'Consent mode is enabled', 'data-tracker-woocommerce' ),
+				'message'  => __( 'Tracking starts only after visitors give consent. Being blocked by consent is expected, not a tracking problem.', 'data-tracker-woocommerce' ),
+				'solution' => __( 'Connect a consent plugin that supports the WP Consent API so visitors can grant consent.', 'data-tracker-woocommerce' ),
+			);
+		}
+
 		$enabled = (array) $this->options->get( 'enabled_events' );
 		$purchase_enabled = in_array( 'purchase', $enabled, true );
 		$checks[] = array(
@@ -165,10 +176,10 @@ class Health {
 					'status'   => 'warning',
 					'weight'   => 5,
 					'label'    => /* translators: %s: platform label */
-						sprintf( __( 'Another %s setup was found', 'data-tracker-woocommerce' ), $map['label'] ),
+						sprintf( __( 'Possible duplicate %s detected', 'data-tracker-woocommerce' ), $map['label'] ),
 					'message'  => /* translators: 1: platform label, 2: detected id */
-						sprintf( __( 'We found another %1$s tracking setup on your website (%2$s). This may cause duplicate data.', 'data-tracker-woocommerce' ), $map['label'], implode( ', ', $extra ) ),
-					'solution' => __( 'Remove the other tracking code for this platform to avoid counting the same events twice.', 'data-tracker-woocommerce' ),
+						sprintf( __( 'Another plugin or integration may also be sending %1$s events (%2$s). Duplicate events can cause inaccurate conversion reporting.', 'data-tracker-woocommerce' ), $map['label'], implode( ', ', $extra ) ),
+					'solution' => __( 'The plugin cannot confirm this is a duplicate. If you see double-counted events, remove the other tracking code for this platform.', 'data-tracker-woocommerce' ),
 				);
 			}
 		}

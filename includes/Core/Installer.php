@@ -24,10 +24,9 @@ class Installer {
 
 		if ( empty( $settings ) ) {
 			add_option( Options::OPTION_NAME, array( 'show_welcome' => 1 ) );
-		} else {
-			$settings['show_welcome'] = 1;
-			update_option( Options::OPTION_NAME, $settings, false );
 		}
+
+		update_option( 'dtw_version', DTW_VERSION, false );
 	}
 
 	/**

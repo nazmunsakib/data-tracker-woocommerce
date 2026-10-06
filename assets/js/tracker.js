@@ -312,7 +312,7 @@ ga4Send('begin_checkout', cartPayload());
 		}
 
 		if (type === 'order-received' && context.order) {
-			if (eventEnabled('purchase')) {
+			if (eventEnabled('purchase') && context.order.trackable !== false) {
 				var orderFlag = 'dtw_p_' + String(context.order.id);
 				if (!readFlag(orderFlag)) {
 					ga4Send('purchase', purchasePayload());
@@ -444,6 +444,10 @@ ga4Send('begin_checkout', cartPayload());
 			return;
 		}
 
+		if (metaConsentAllowed() === false) {
+			return;
+		}
+
 		try {
 			var params = new URLSearchParams(window.location.search);
 			var fieldMap = {
@@ -514,7 +518,7 @@ ga4Send('begin_checkout', cartPayload());
 	}
 
 	function setFlag(name) {
-		document.cookie = name + '=1;path=/;max-age=86400;SameSite=Lax';
+		document.cookie = name + '=1;path=/;max-age=' + (60 * 60 * 24 * 30) + ';SameSite=Lax';
 	}
 
 	function runTest() {

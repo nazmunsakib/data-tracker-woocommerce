@@ -294,9 +294,9 @@ The plugin is designed to work with:
 * Classic WordPress themes
 * Block themes
 * Gutenberg
-* WooCommerce Blocks
+* WooCommerce Blocks page events (cart, checkout and purchase events use WooCommerce order data; cart add/remove micro-events are optimized for classic cart flows)
 
-Compatibility with specific themes, caching plugins, checkout customizations and third-party tracking plugins may vary.
+Compatibility with specific themes, caching plugins, checkout customizations and third-party tracking plugins may vary. Test your specific checkout configuration.
 
 == Recommended Use ==
 

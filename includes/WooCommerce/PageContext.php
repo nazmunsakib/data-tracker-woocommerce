@@ -141,6 +141,12 @@ class PageContext {
 			return array();
 		}
 
+		$key = (string) get_query_var( 'key' );
+
+		if ( '' === $key || $key !== $order->get_order_key() ) {
+			return array();
+		}
+
 		$items    = array();
 		$products = array();
 
@@ -163,6 +169,8 @@ class PageContext {
 		return array(
 			'id'             => $order->get_id(),
 			'key'            => $order->get_order_key(),
+			'status'         => $order->get_status(),
+			'trackable'      => ! in_array( $order->get_status(), array( 'failed', 'cancelled', 'refunded', 'pending', 'checkout-draft' ), true ),
 			'total'          => $this->format_number( $order->get_total() ),
 			'subtotal'       => $this->format_number( $order->get_subtotal() ),
 			'shipping'       => $this->format_number( $order->get_shipping_total() ),
