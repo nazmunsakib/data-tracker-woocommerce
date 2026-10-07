@@ -291,6 +291,9 @@ class Server {
 			}
 		}
 
+		$gtm = ( new Detector() )->get_gtm_containers();
+		$lines[] = 'Google Tag Manager: ' . ( $gtm ? implode( ', ', $gtm ) : 'Not detected' );
+
 		return rest_ensure_response(
 			array(
 				'ok'   => true,

@@ -83,14 +83,28 @@ class Detector {
 		return $result;
 	}
 
-	/**
-	 * De-duplicate a capture group, guarding against optional/absent groups.
-	 *
-	 * @param array  $matches preg_match_all output.
-	 * @param int    $group   Capture group index (0 = full matches).
-	 * @return array
-	 */
-	private function unique_matches( $matches, $group ) {
+/**
+ * Google Tag Manager containers detected on the storefront.
+ *
+ * Used to warn store owners that Tag Manager may also load tracking tags
+ * (for example the same GA4 property) and can conflict with directly-loaded
+ * tracking. The plugin cannot confirm what a container loads.
+ *
+ * @return array
+ */
+public function get_gtm_containers() {
+	$scan = $this->scan();
+	return ! empty( $scan['found']['gtm'] ) ? (array) $scan['found']['gtm'] : array();
+}
+
+/**
+ * De-duplicate a capture group, guarding against optional/absent groups.
+ *
+ * @param array  $matches preg_match_all output.
+ * @param int    $group   Capture group index (0 = full matches).
+ * @return array
+ */
+private function unique_matches( $matches, $group ) {
 		$values = isset( $matches[ $group ] ) ? (array) $matches[ $group ] : array();
 		return array_values( array_unique( $values ) );
 	}

@@ -74,6 +74,7 @@ class Dashboard {
 		$connected     = $this->platforms->has_any_connected();
 		$debug_mode    = (bool) $this->options->get( 'debug_mode' );
 		$platform_cards = $this->platform_cards();
+		$other_tracking = ( new \DataTracker\Diagnostics\Detector() )->get_gtm_containers();
 
 		include DTW_PLUGIN_DIR . 'templates/admin/dashboard.php';
 	}

@@ -269,6 +269,27 @@ foreach ( $platform_cards as $card ) {
 		</div>
 	</div>
 
+	<?php if ( ! empty( $other_tracking ) ) : ?>
+		<div class="dtw-card dtw-card--muted">
+			<div class="dtw-card__head">
+				<h2 class="dtw-card__title"><?php esc_html_e( 'Other tracking found on this site', 'data-tracker-woocommerce' ); ?></h2>
+				<span class="dtw-badge dtw-badge--warn"><?php esc_html_e( 'Review', 'data-tracker-woocommerce' ); ?></span>
+			</div>
+			<p class="dtw-card__desc">
+				<?php
+				/* translators: %s: GTM container ids */
+				printf( esc_html__( 'We detected Google Tag Manager (%s). Tag Manager may also load Google or advertising tags, which can double-count page views or hide events from directly-loaded tracking. We cannot confirm what it loads.', 'data-tracker-woocommerce' ), esc_html( implode( ', ', (array) $other_tracking ) ) );
+				?>
+			</p>
+			<details class="dtw-problem__how">
+				<summary><?php esc_html_e( 'Show Me How', 'data-tracker-woocommerce' ); ?></summary>
+				<p class="dtw-problem__solution">
+					<?php esc_html_e( 'If you use Data Tracker for Google Analytics, remove the GA4 tag from Tag Manager so only Data Tracker loads it. Otherwise review what Tag Manager loads and disable GA4 there to avoid duplicates.', 'data-tracker-woocommerce' ); ?>
+				</p>
+			</details>
+		</div>
+	<?php endif; ?>
+
 	<?php if ( $has_problems ) : ?>
 		<div class="dtw-card" id="dtw-problems">
 			<div class="dtw-card__head">

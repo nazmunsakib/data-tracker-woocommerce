@@ -138,6 +138,23 @@ class Health {
 			);
 		}
 
+		$gtm = $this->detector->get_gtm_containers();
+
+		if ( ! empty( $gtm ) ) {
+			$checks[] = array(
+				'id'       => 'gtm_audit',
+				'status'   => 'info',
+				'weight'   => 0,
+				'label'    => __( 'Google Tag Manager is running on this site', 'data-tracker-woocommerce' ),
+				'message'  => sprintf(
+					/* translators: %s: GTM container ids */
+					__( 'We found Google Tag Manager (%s). Tag Manager can also load Google or advertising tags, which may double-count page views or interfere with directly-loaded tracking. We cannot confirm what it loads.', 'data-tracker-woocommerce' ),
+					implode( ', ', $gtm )
+				),
+				'solution' => __( 'If you use Data Tracker for Google Analytics, remove any GA4 tag from Tag Manager so only Data Tracker loads it. Otherwise review what Tag Manager loads and disable GA4 there to avoid duplicates.', 'data-tracker-woocommerce' ),
+			);
+		}
+
 		$enabled = (array) $this->options->get( 'enabled_events' );
 		$purchase_enabled = in_array( 'purchase', $enabled, true );
 		$checks[] = array(
