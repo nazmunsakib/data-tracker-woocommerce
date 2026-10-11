@@ -103,9 +103,9 @@ class Tracker {
 
 		wp_enqueue_script(
 			'dtw-tracker',
-			DTW_PLUGIN_URL . 'assets/js/tracker.js',
+			DTW_PLUGIN_URL . 'assets/js/frontend.js',
 			array(),
-			filemtime( DTW_PLUGIN_DIR . 'assets/js/tracker.js' ) ?: DTW_VERSION,
+			filemtime( DTW_PLUGIN_DIR . 'assets/js/frontend.js' ) ?: DTW_VERSION,
 			true
 		);
 		wp_localize_script( 'dtw-tracker', 'DTW', $this->localize_data() );

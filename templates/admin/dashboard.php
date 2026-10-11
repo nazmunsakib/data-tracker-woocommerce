@@ -33,6 +33,7 @@ $activity_labels = array(
 	'add_payment_info' => __( 'Add Payment Information', 'data-tracker-woocommerce' ),
 	'purchase'         => __( 'Purchase', 'data-tracker-woocommerce' ),
 	'dtw_test_event'   => __( 'Tracking Test', 'data-tracker-woocommerce' ),
+	'tracker_ready'    => __( 'Tracker loaded on the storefront', 'data-tracker-woocommerce' ),
 );
 
 $platform_labels = array(
@@ -193,6 +194,8 @@ foreach ( $platform_cards as $card ) {
 												<span class="dtw-activity__platform dtw-activity__platform--source"><?php esc_html_e( 'WooCommerce order', 'data-tracker-woocommerce' ); ?></span>
 											<?php elseif ( 'test' === $pid ) : ?>
 												<span class="dtw-activity__platform dtw-activity__platform--source"><?php esc_html_e( 'Manual test', 'data-tracker-woocommerce' ); ?></span>
+											<?php elseif ( 'browser' === $pid ) : ?>
+												<span class="dtw-activity__platform dtw-activity__platform--source"><?php esc_html_e( 'Storefront script', 'data-tracker-woocommerce' ); ?></span>
 											<?php else : ?>
 												<span class="dtw-activity__platform"><?php echo esc_html( isset( $platform_labels[ $pid ] ) ? $platform_labels[ $pid ] : $pid ); ?> ✓</span>
 											<?php endif; ?>

@@ -651,11 +651,14 @@ ga4Send('begin_checkout', cartPayload());
 			initConsent();
 		} catch (e) {}
 
-		if (DTW.is_test) {
+		if (parseInt(DTW.is_test, 10)) {
 			setTimeout(runTest, 1200);
 			return;
 		}
 
+		try {
+			logTrackerHeartbeat();
+		} catch (e) {}
 		try {
 			initPageEvents();
 		} catch (e) {}
@@ -665,6 +668,21 @@ ga4Send('begin_checkout', cartPayload());
 		try {
 			initPaymentInfoTracking();
 		} catch (e) {}
+	}
+
+	function logTrackerHeartbeat() {
+		if (!debug.log_enabled) {
+			return;
+		}
+		try {
+			if (window.sessionStorage && sessionStorage.getItem('dtw_heartbeat')) {
+				return;
+			}
+			sessionStorage.setItem('dtw_heartbeat', '1');
+		} catch (e) {
+			return;
+		}
+		logEvent('tracker_ready', 'browser', { url: window.location.href });
 	}
 
 	if (document.readyState === 'loading') {
